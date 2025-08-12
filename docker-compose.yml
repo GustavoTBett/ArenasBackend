@@ -45,8 +45,8 @@ services:
     image: postgres:alpine
     hostname: postgres
     restart: always
-    networks:
-      - internal
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: arenas
       POSTGRES_USER: arenas_user
