@@ -1,7 +1,7 @@
 package com.projetoWeb.Arenas.controller;
 
 import com.projetoWeb.Arenas.controller.dto.CreateUserDto;
-import com.projetoWeb.Arenas.model.Usuario;
+import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.model.enums.PermissaoEnums;
 import com.projetoWeb.Arenas.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
@@ -18,7 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-@RestController
+@RestController(value = "user")
 public class UserController {
 
     @Autowired
@@ -36,7 +36,7 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
-        var user = new Usuario();
+        var user = new User();
         user.setEmail(dto.email());
         user.setPassword(passwordEncoder.encode(dto.password()));
         user.setRole(PermissaoEnums.BASICO);
@@ -48,7 +48,7 @@ public class UserController {
 
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<List<Usuario>> listUsers() {
+    public ResponseEntity<List<User>> listUsers() {
         var users = userRepository.findAll();
         return ResponseEntity.ok(users);
     }

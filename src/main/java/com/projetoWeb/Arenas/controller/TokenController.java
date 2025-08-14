@@ -2,6 +2,7 @@ package com.projetoWeb.Arenas.controller;
 
 import com.projetoWeb.Arenas.controller.dto.LoginResponse;
 import com.projetoWeb.Arenas.repository.UsuarioRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Instant;
 import java.util.Map;
 
-@RestController
+@RestController(value = "token")
 public class TokenController {
 
     private final JwtEncoder jwtEncoder;
@@ -32,7 +33,8 @@ public class TokenController {
 
     @GetMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestParam("username") String username,
-                                               @RequestParam("password") String password) {
+                                               @RequestParam("password") String password,
+                                               HttpServletRequest request) {
         var user = userRepository.findByEmail(username);
 
         if (user.isEmpty() || !user.get().isLoginCorrect(password, passwordEncoder)) {
@@ -54,6 +56,9 @@ public class TokenController {
 
         var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
+        HttpSession session = request.getSession(true);
+        session.setAttribute("JWT_TOKEN", jwtValue);
+
         return ResponseEntity.ok(LoginResponse.builder()
                 .accessToken(jwtValue)
                 .expiresIn(expiresIn)
@@ -66,7 +71,7 @@ public class TokenController {
         if (jwtToken == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        // Aqui pode validar o token e retornar info do usuário
+
         return ResponseEntity.ok(Map.of("token", jwtToken));
     }
 

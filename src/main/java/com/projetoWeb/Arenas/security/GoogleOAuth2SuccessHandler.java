@@ -1,6 +1,6 @@
 package com.projetoWeb.Arenas.security;
 
-import com.projetoWeb.Arenas.model.Usuario;
+import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.model.enums.PermissaoEnums;
 import com.projetoWeb.Arenas.repository.UsuarioRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,7 +34,7 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
         var user = userRepository.findByEmail(email)
                 .orElseGet(() -> {
-                    Usuario novo = new Usuario();
+                    User novo = new User();
                     novo.setEmail(email);
                     novo.setPassword("");
                     novo.setRole(PermissaoEnums.BASICO);
@@ -54,9 +54,9 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
         var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
-        HttpSession session = request.getSession(true); // cria sessão se não existir
+        HttpSession session = request.getSession(true);
         session.setAttribute("JWT_TOKEN", jwtValue);
 
-        response.sendRedirect("http://localhost:3000/login-success);
+        response.sendRedirect("http://localhost:3000/login-success");
     }
 }
