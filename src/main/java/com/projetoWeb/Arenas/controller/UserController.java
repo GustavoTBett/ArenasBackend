@@ -1,55 +1,90 @@
 package com.projetoWeb.Arenas.controller;
 
 import com.projetoWeb.Arenas.controller.dto.CreateUserDto;
-import com.projetoWeb.Arenas.model.User;
-import com.projetoWeb.Arenas.model.enums.PermissaoEnums;
-import com.projetoWeb.Arenas.repository.UsuarioRepository;
-import jakarta.transaction.Transactional;
+import com.projetoWeb.Arenas.controller.dto.LoginRequestDto;
+import com.projetoWeb.Arenas.controller.dto.UpdateUserDto;
+import com.projetoWeb.Arenas.service.TokenService;
+import com.projetoWeb.Arenas.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.List;
+import java.net.URI;
 
 @RestController(value = "user")
 public class UserController {
 
     @Autowired
-    private UsuarioRepository userRepository;
+    private UserService userService;
 
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private AuthenticationManager authenticationManager;
 
-    @Transactional
-    @PostMapping("/createUser")
-    public ResponseEntity<Void> newUser(@RequestBody CreateUserDto dto) {
+    @Autowired
+    private TokenService tokenService;
 
-        var userFromDb = userRepository.findByEmail(dto.email());
-        if (userFromDb.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
-        }
+    @PostMapping()
+    public ResponseEntity create(@RequestBody CreateUserDto dto) {
+        Long userIdCreated = userService.createdUser(dto);
 
-        var user = new User();
-        user.setEmail(dto.email());
-        user.setPassword(passwordEncoder.encode(dto.password()));
-        user.setRole(PermissaoEnums.BASICO);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(userIdCreated)
+                .toUri();
 
-        userRepository.save(user);
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.created(location).build();
     }
 
-    @GetMapping("/users")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<List<User>> listUsers() {
-        var users = userRepository.findAll();
-        return ResponseEntity.ok(users);
+//    @GetMapping("")
+//    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+//    public ResponseEntity<List<User>> listUsers() {
+//        var users = userRepository.findAll();
+//        return ResponseEntity.ok(users);
+//    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity listUserById(@RequestParam("id") Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity updateUser(@RequestParam("id") Long id, @RequestBody UpdateUserDto updateUserDto) {
+        return ResponseEntity.ok(userService.updateUser(id, updateUserDto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteUser(@RequestParam("id") Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity login(@RequestBody LoginRequestDto loginRequest) {
+        UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password());
+
+        Authentication auth = this.authenticationManager.authenticate(usernamePassword);
+        String token = tokenService.generateToken(auth.getName());
+
+        ResponseCookie cookie = tokenService.generateResponseCookieLogin(token);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body("Login bem-sucedido!");
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        ResponseCookie cookie = tokenService.generateResponseCookieLogout();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body("Logout bem-sucedido!");
     }
 }

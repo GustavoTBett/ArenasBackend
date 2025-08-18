@@ -1,7 +1,6 @@
 package com.projetoWeb.Arenas.model;
 
 import com.projetoWeb.Arenas.model.converter.MatchLevel;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;

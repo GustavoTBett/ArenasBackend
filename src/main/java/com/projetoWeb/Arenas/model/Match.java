@@ -2,7 +2,6 @@ package com.projetoWeb.Arenas.model;
 
 import com.projetoWeb.Arenas.model.converter.MatchStatusConverter;
 import com.projetoWeb.Arenas.model.enums.MatchStatus;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;

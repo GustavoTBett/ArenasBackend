@@ -1,30 +1,26 @@
 package com.projetoWeb.Arenas.security;
 
 import com.projetoWeb.Arenas.model.User;
-import com.projetoWeb.Arenas.model.enums.PermissaoEnums;
-import com.projetoWeb.Arenas.repository.UsuarioRepository;
+import com.projetoWeb.Arenas.service.TokenService;
+import com.projetoWeb.Arenas.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
 import java.io.IOException;
-import java.time.Instant;
 
 public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final UsuarioRepository userRepository;
-    private final JwtEncoder jwtEncoder;
+    @Autowired
+    private TokenService tokenService;
 
-    public GoogleOAuth2SuccessHandler(UsuarioRepository userRepository, JwtEncoder jwtEncoder) {
-        this.userRepository = userRepository;
-        this.jwtEncoder = jwtEncoder;
-    }
+    @Autowired
+    private UserService userService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -32,31 +28,17 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
 
-        var user = userRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    User novo = new User();
-                    novo.setEmail(email);
-                    novo.setPassword("");
-                    novo.setRole(PermissaoEnums.BASICO);
-                    return userRepository.save(novo);
-                });
+        User user = userService.getUserByEmail(email);
+        if (user == null) {
+            user = userService.createUserByGoogle(email);
+        }
 
-        var now = Instant.now();
-        var expiresIn = 18000000L;
+        String token = tokenService.generateToken(user.getEmail());
 
-        var claims = JwtClaimsSet.builder()
-                .issuer("mybackend")
-                .subject(user.getId().toString())
-                .issuedAt(now)
-                .expiresAt(now.plusSeconds(expiresIn))
-                .claim("scope", user.getRole())
-                .build();
+        ResponseCookie cookie = tokenService.generateResponseCookieLogin(token);
 
-        var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        HttpSession session = request.getSession(true);
-        session.setAttribute("JWT_TOKEN", jwtValue);
-
-        response.sendRedirect("http://localhost:3000/login-success");
+        getRedirectStrategy().sendRedirect(request, response, "http://localhost:3000/login-success");
     }
 }

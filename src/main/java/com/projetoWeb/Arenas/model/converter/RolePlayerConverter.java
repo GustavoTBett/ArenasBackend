@@ -1,6 +1,5 @@
 package com.projetoWeb.Arenas.model.converter;
 
-import com.projetoWeb.Arenas.model.enums.PermissaoEnums;
 import com.projetoWeb.Arenas.model.enums.RolePlayer;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

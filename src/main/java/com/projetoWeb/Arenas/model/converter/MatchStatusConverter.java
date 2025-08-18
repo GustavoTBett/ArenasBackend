@@ -1,7 +1,6 @@
 package com.projetoWeb.Arenas.model.converter;
 
 import com.projetoWeb.Arenas.model.enums.MatchStatus;
-import com.projetoWeb.Arenas.model.enums.RolePlayer;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

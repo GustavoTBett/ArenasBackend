@@ -13,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.Base64;
 import java.util.List;
 
 @Data
@@ -36,8 +35,9 @@ public class User {
     @Convert(converter = PermissaoEnumsConverter.class)
     private PermissaoEnums role;
 
-    @Column
-    private Base64 profilePic;
+    @Lob
+    @Column(columnDefinition = "BYTEA")
+    private byte[] profilePic;
 
     @Column(length = 5000)
     private String profileDescription;
