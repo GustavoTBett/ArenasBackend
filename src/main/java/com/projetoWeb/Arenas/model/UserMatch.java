@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class UserMatch {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

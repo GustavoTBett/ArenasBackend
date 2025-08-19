@@ -36,14 +36,22 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
             user = userService.createUserByGoogle(email);
         }
 
-        String token = tokenService.generateToken(user.getEmail());
+        String accessToken = tokenService.generateToken(user.getEmail(), user.getAuthorities());
 
-        ResponseCookie cookie = tokenService.generateResponseCookieLogin(token);
+        // ✅ 2. Gera e salva o Refresh Token de longa duração
+        String refreshToken = tokenService.generateAndSaveRefreshToken(user.getEmail());
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        // ✅ 3. Cria os dois cookies
+        ResponseCookie accessTokenCookie = tokenService.generateResponseCookieLogin(accessToken);
+        ResponseCookie refreshTokenCookie = tokenService.createRefreshTokenCookie(refreshToken);
+
+        // ✅ 4. Adiciona AMBOS os cookies à resposta
+        response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
         clearAuthenticationAttributes(request);
 
-        getRedirectStrategy().sendRedirect(request, response, "http://localhost:8080/home");
+        // 5. Redireciona para o front-end
+        getRedirectStrategy().sendRedirect(request, response, "http://localhost:8080/home"); // Lembre-se de ajustar a porta se necessário
     }
 }

@@ -1,4 +1,4 @@
-package com.projetoWeb.Arenas.security;
+package com.projetoWeb.Arenas.security.cookie;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
