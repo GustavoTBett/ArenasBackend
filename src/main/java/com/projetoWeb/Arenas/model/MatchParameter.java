@@ -2,13 +2,17 @@ package com.projetoWeb.Arenas.model;
 
 import com.projetoWeb.Arenas.model.converter.MatchLevel;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
 @Table(name = "match_paramter")
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MatchParameter {
 
     @Id
@@ -27,7 +31,7 @@ public class MatchParameter {
     @Column
     private Boolean notifyUser = false;
 
-    @Column(nullable = false)
+    @JoinColumn(name = "match_id", nullable = false)
     @OneToOne
     private Match match;
 }

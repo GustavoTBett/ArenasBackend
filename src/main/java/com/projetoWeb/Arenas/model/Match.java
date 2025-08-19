@@ -3,8 +3,10 @@ package com.projetoWeb.Arenas.model;
 import com.projetoWeb.Arenas.model.converter.MatchStatusConverter;
 import com.projetoWeb.Arenas.model.enums.MatchStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
 
@@ -12,6 +14,8 @@ import java.time.ZonedDateTime;
 @Entity
 @Table(name = "match")
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Match {
 
     @Id
@@ -30,13 +34,11 @@ public class Match {
     @Column(nullable = false)
     private Long maxPlayers;
 
-    @Column(nullable = false)
+    @JoinColumn(name = "creator_user_id", nullable = false)
     @ManyToOne
     private User createrUserId;
 
     @Column(nullable = false)
     @Convert(converter = MatchStatusConverter.class)
     private MatchStatus matchStatus = MatchStatus.AGENDADA;
-
-
 }

@@ -45,9 +45,11 @@ public class UserService {
 
     @Transactional
     public User createUserByGoogle(String email) {
+        String teste = UUID.randomUUID().toString();
+        System.out.println(teste);
         User user = User.builder()
                 .email(email)
-                .password(UUID.randomUUID().toString())
+                .password(passwordEncoder.encode(teste))
                 .role(PermissaoEnums.BASICO)
                 .build();
 

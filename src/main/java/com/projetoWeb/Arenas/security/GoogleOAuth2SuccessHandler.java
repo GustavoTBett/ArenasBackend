@@ -3,6 +3,7 @@ package com.projetoWeb.Arenas.security;
 import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.service.TokenService;
 import com.projetoWeb.Arenas.service.UserService;
+import com.projetoWeb.Arenas.service.exception.UserNotExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,10 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
 
-        User user = userService.getUserByEmail(email);
-        if (user == null) {
+        User user;
+        try {
+            user = userService.getUserByEmail(email);
+        } catch (UserNotExistsException userNotExistsException) {
             user = userService.createUserByGoogle(email);
         }
 
@@ -39,6 +42,8 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        getRedirectStrategy().sendRedirect(request, response, "http://localhost:3000/login-success");
+        clearAuthenticationAttributes(request);
+
+        getRedirectStrategy().sendRedirect(request, response, "http://localhost:8080/home");
     }
 }

@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class CookieJwtResolver implements BearerTokenResolver {
 
-    private static final String COOKIE_NAME = "access-token";
+    private static final String COOKIE_NAME = "jwt-token";
 
     @Override
     public String resolve(HttpServletRequest request) {

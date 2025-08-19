@@ -12,12 +12,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
-@RestController(value = "user")
+@RestController
+@RequestMapping("/user")
 public class UserController {
 
     @Autowired
@@ -63,6 +66,15 @@ public class UserController {
     public ResponseEntity deleteUser(@RequestParam("id") Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity getCurrentUser(@AuthenticationPrincipal Jwt jwt) { // Mude o tipo para Jwt
+        if (jwt != null) {
+            return ResponseEntity.ok(jwt.getSubject());
+        } else {
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @PostMapping("/login")

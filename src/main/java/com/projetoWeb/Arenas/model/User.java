@@ -5,20 +5,22 @@ import com.projetoWeb.Arenas.model.converter.RolePlayerConverter;
 import com.projetoWeb.Arenas.model.enums.PermissaoEnums;
 import com.projetoWeb.Arenas.model.enums.RolePlayer;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.List;
 
 @Data
 @Entity
 @Table(name = "users")
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
@@ -35,7 +37,6 @@ public class User {
     @Convert(converter = PermissaoEnumsConverter.class)
     private PermissaoEnums role;
 
-    @Lob
     @Column(columnDefinition = "BYTEA")
     private byte[] profilePic;
 
@@ -45,7 +46,7 @@ public class User {
     @Column(length = 11)
     private String phone;
 
-    @Column(nullable = false)
+    @Column()
     private String firstName;
 
     @Column
@@ -59,17 +60,10 @@ public class User {
     @UpdateTimestamp
     private ZonedDateTime updatedAt;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate birthDate;
 
     @Column
     @Convert(converter = RolePlayerConverter.class)
     private RolePlayer rolePlayer;
-
-    @ManyToMany(mappedBy = "user")
-    private List<Match> matches;
-
-    public boolean isLoginCorrect(String password, PasswordEncoder passwordEncoder) {
-        return passwordEncoder.matches(password, this.password);
-    }
 }

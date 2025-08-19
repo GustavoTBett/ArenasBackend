@@ -1,7 +1,6 @@
 package com.projetoWeb.Arenas.security;
 
 import com.projetoWeb.Arenas.service.UserService;
-import jakarta.transaction.Transactional;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +20,6 @@ public class UserDetailsImpl  implements UserDetailsService {
     }
 
     @Override
-    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         com.projetoWeb.Arenas.model.User user = userService.getUserByEmail(username);
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),

@@ -22,7 +22,7 @@ public class TokenService {
     private JwtEncoder jwtEncoder;
 
     @Value(value = "SPRING_JPA_SHOW_SQL")
-    private Boolean value;
+    private String value;
 
     public String generateToken(String email) {
         var now = Instant.now();
@@ -45,7 +45,7 @@ public class TokenService {
     public ResponseCookie generateResponseCookieLogin(String jwt) {
         return ResponseCookie.from("jwt-token", jwt)
                 .httpOnly(true)       // Impede acesso via JavaScript
-                .secure(!value)         // Enviar apenas em HTTPS (essencial em produção)
+                .secure(!(value.equals("true")))         // Enviar apenas em HTTPS (essencial em produção)
                 .path("/")            // Válido para todas as rotas da aplicação
                 .maxAge(TokenService.expiresIn)    // Tempo de vida do cookie (em segundos)
                 .sameSite("Lax")      // Proteção contra CSRF. 'Strict' é mais seguro, mas 'Lax' é um bom padrão para SPAs.
@@ -55,7 +55,7 @@ public class TokenService {
     public ResponseCookie generateResponseCookieLogout() {
         return ResponseCookie.from("jwt-token", "")
                 .httpOnly(true)
-                .secure(!value)
+                .secure(!(value.equals("true")))
                 .path("/")
                 .maxAge(0) // Instruí o navegador a apagar o cookie imediatamente
                 .sameSite("Lax")
