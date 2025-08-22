@@ -3,9 +3,15 @@ package com.projetoWeb.Arenas.service;
 import com.projetoWeb.Arenas.model.RefreshToken;
 import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.repository.RefreshTokenRepository;
+import com.projetoWeb.Arenas.service.exception.RefreshTokenExpiredExpection;
+import com.projetoWeb.Arenas.service.exception.RefreshTokenNotExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -28,6 +34,9 @@ public class TokenService {
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     private long accessTokenExpirationMinutes = 15;
 
@@ -74,24 +83,28 @@ public class TokenService {
     public String generateAndSaveRefreshToken(String email) {
         User user = userService.getUserByEmail(email);
 
-        RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setUser(user);
+        Optional<RefreshToken> optionalRefreshToken = this.refreshTokenRepository.findByUser(user);
+        RefreshToken refreshToken;
+        if (optionalRefreshToken.isPresent()) {
+            refreshToken = optionalRefreshToken.get();
+        } else {
+            refreshToken = new RefreshToken();
+            refreshToken.setUser(user);
+        }
+
         refreshToken.setExpiryDate(Instant.now().plus(refreshTokenExpirationDays, ChronoUnit.DAYS));
         refreshToken.setToken(UUID.randomUUID().toString());
+
 
         refreshTokenRepository.save(refreshToken);
         return refreshToken.getToken();
     }
 
-    /**
-     * Cria o cookie para o Refresh Token.
-     * Note o path mais restrito para maior segurança.
-     */
     public ResponseCookie createRefreshTokenCookie(String token) {
         return ResponseCookie.from("refresh-token", token)
                 .httpOnly(true)
                 .secure(true)
-                .path("/user/refresh-token") // Só será enviado para o endpoint de refresh
+                .path("/")
                 .maxAge(refreshTokenExpirationDays * 24 * 60 * 60)
                 .sameSite("Strict")
                 .build();
@@ -101,29 +114,32 @@ public class TokenService {
         return ResponseCookie.from("refresh-token", "")
                 .httpOnly(true)
                 .secure(true)
-                .path("/user/refresh-token")
-                .maxAge(0) // Instruí o navegador a apagar o cookie imediatamente
+                .path("/")
+                .maxAge(0)
                 .sameSite("Strict")
                 .build();
     }
 
-    /**
-     * Valida um Refresh Token.
-     * Retorna o email do usuário se o token for válido.
-     */
-    public Optional<String> validateRefreshToken(String token) {
+    public ResponseCookie validateRefreshToken(String token) {
         Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByToken(token);
 
         if (refreshTokenOpt.isEmpty()) {
-            return Optional.empty(); // Token não encontrado
+            throw new RefreshTokenNotExistsException("O refresh token não existe");
         }
 
         RefreshToken refreshToken = refreshTokenOpt.get();
         if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
             refreshTokenRepository.delete(refreshToken);
-            return Optional.empty(); // Token expirado
+            throw new RefreshTokenExpiredExpection("O refresh token está expirado");
         }
 
-        return Optional.of(refreshToken.getUser().getEmail());
+        return this.createCookieToken(refreshToken);
+    }
+
+    private ResponseCookie createCookieToken(RefreshToken refreshToken) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(refreshToken.getUser().getEmail());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        String newAccessToken = this.generateToken(authentication.getName(), authentication.getAuthorities());
+        return this.generateResponseCookieLogin(newAccessToken);
     }
 }

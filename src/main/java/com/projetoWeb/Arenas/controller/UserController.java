@@ -4,6 +4,7 @@ import com.projetoWeb.Arenas.controller.dto.CreateUserDto;
 import com.projetoWeb.Arenas.controller.dto.LoginRequestDto;
 import com.projetoWeb.Arenas.controller.dto.ResponseUserDto;
 import com.projetoWeb.Arenas.controller.dto.UpdateUserDto;
+import com.projetoWeb.Arenas.model.RefreshToken;
 import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.service.TokenService;
 import com.projetoWeb.Arenas.service.UserService;
@@ -78,7 +79,7 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails instanceof User) { // Verificação de tipo para segurança
+        if (userDetails instanceof User) {
             User user = (User) userDetails;
             ResponseUserDto responseUserDto = ResponseUserDto.builder()
                     .email(user.getEmail())
@@ -87,7 +88,7 @@ public class UserController {
                     .build();
             return ResponseEntity.ok(responseUserDto);
         }
-        // Se o principal não for do tipo User, algo está errado na autenticação
+
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
@@ -110,28 +111,19 @@ public class UserController {
 
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@CookieValue(name = "refresh-token") String refreshToken) {
-        return tokenService.validateRefreshToken(refreshToken)
-                .map(email -> {
-                    // Se o refresh token é válido, precisamos do objeto Authentication para gerar um novo access token
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    String newAccessToken = tokenService.generateToken(authentication.getName(), authentication.getAuthorities());
-                    ResponseCookie newAccessTokenCookie = tokenService.generateResponseCookieLogin(newAccessToken);
-                    return ResponseEntity.ok()
-                            .header(HttpHeaders.SET_COOKIE, newAccessTokenCookie.toString())
-                            .build();
-                })
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token inválido."));
+        ResponseCookie responseCookie = tokenService.validateRefreshToken(refreshToken);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                .build();
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@CookieValue(name = "refresh-token", required = false) String refreshToken) {
-        // Invalida o refresh token no banco de dados
         if (refreshToken != null) {
             tokenService.invalidateRefreshToken(refreshToken);
         }
 
-        // Cria cookies de expiração para ambos os tokens
         ResponseCookie accessTokenCookie = tokenService.generateResponseCookieLogout();
         ResponseCookie refreshTokenCookie = tokenService.generateResponseRefreshTokeCookieLogout();
 
