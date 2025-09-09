@@ -3,7 +3,7 @@ package com.projetoWeb.Arenas.security;
 import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.service.TokenService;
 import com.projetoWeb.Arenas.service.UserService;
-import com.projetoWeb.Arenas.service.exception.UserNotExistsException;
+import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         User user;
         try {
             user = userService.getUserByEmail(email);
-        } catch (UserNotExistsException userNotExistsException) {
+        } catch (EntityNotExistsException entityNotExistsException) {
             user = userService.createUserByGoogle(email);
         }
 

@@ -6,7 +6,7 @@ import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.model.enums.PermissaoEnums;
 import com.projetoWeb.Arenas.repository.UserRepository;
 import com.projetoWeb.Arenas.service.exception.AlreadyExistsEmailUserException;
-import com.projetoWeb.Arenas.service.exception.UserNotExistsException;
+import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -65,7 +65,7 @@ public class UserService {
             return optionalUser.get();
         }
 
-        throw new UserNotExistsException("O usuário com o id informado não existe na base de dados");
+        throw new EntityNotExistsException("O usuário com o id informado não existe na base de dados");
     }
 
     @Transactional
@@ -75,7 +75,7 @@ public class UserService {
             return optionalUser.get();
         }
 
-        throw new UserNotExistsException("O usuário com o email informado não existe na base de dados");
+        throw new EntityNotExistsException("O usuário com o email informado não existe na base de dados");
     }
 
     @Transactional

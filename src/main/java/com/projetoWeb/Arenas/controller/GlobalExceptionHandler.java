@@ -3,7 +3,7 @@ package com.projetoWeb.Arenas.controller;
 import com.projetoWeb.Arenas.service.exception.AlreadyExistsEmailUserException;
 import com.projetoWeb.Arenas.service.exception.RefreshTokenExpiredExpection;
 import com.projetoWeb.Arenas.service.exception.RefreshTokenNotExistsException;
-import com.projetoWeb.Arenas.service.exception.UserNotExistsException;
+import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserNotExistsException.class)
-    public ResponseEntity<ProblemDetail> handleUserNotExistsException(UserNotExistsException e) {
+    @ExceptionHandler(EntityNotExistsException.class)
+    public ResponseEntity<ProblemDetail> handleUserNotExistsException(EntityNotExistsException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
-        problemDetail.setTitle("User Not Found");
+        problemDetail.setTitle("Entity Not Found");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
     }
 
