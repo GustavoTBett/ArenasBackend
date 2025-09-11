@@ -1,11 +1,7 @@
 package com.projetoWeb.Arenas.security;
 
-import com.projetoWeb.Arenas.model.User;
-import com.projetoWeb.Arenas.service.TokenService;
-import com.projetoWeb.Arenas.service.UserService;
-import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -14,7 +10,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
-import java.io.IOException;
+import com.projetoWeb.Arenas.model.User;
+import com.projetoWeb.Arenas.service.TokenService;
+import com.projetoWeb.Arenas.service.UserService;
+import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -29,7 +31,7 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws IOException {
+            Authentication authentication) throws IOException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
 
@@ -52,6 +54,6 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         clearAuthenticationAttributes(request);
 
         // 5. Redireciona para o front-end
-        getRedirectStrategy().sendRedirect(request, response, FRONT_URL + "/home");
+        getRedirectStrategy().sendRedirect(request, response, FRONT_URL + "/redirect");
     }
 }
