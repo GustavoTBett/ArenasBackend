@@ -1,7 +1,11 @@
 package com.projetoWeb.Arenas.security;
 
-import java.io.IOException;
-
+import com.projetoWeb.Arenas.model.User;
+import com.projetoWeb.Arenas.service.TokenService;
+import com.projetoWeb.Arenas.service.UserService;
+import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -10,13 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
-import com.projetoWeb.Arenas.model.User;
-import com.projetoWeb.Arenas.service.TokenService;
-import com.projetoWeb.Arenas.service.UserService;
-import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -45,15 +43,12 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         String accessToken = tokenService.generateToken(user.getEmail(), user.getAuthorities());
         String refreshToken = tokenService.generateAndSaveRefreshToken(user.getEmail());
 
-        ResponseCookie accessTokenCookie = tokenService.generateResponseCookieLogin(accessToken);
         ResponseCookie refreshTokenCookie = tokenService.createRefreshTokenCookie(refreshToken);
 
-        response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
         clearAuthenticationAttributes(request);
 
-        // 5. Redireciona para o front-end
-        getRedirectStrategy().sendRedirect(request, response, FRONT_URL + "/redirect");
+        getRedirectStrategy().sendRedirect(request, response, FRONT_URL + "/redirect?token=" + accessToken);
     }
 }

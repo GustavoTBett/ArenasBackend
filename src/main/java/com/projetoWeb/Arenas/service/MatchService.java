@@ -1,13 +1,9 @@
 package com.projetoWeb.Arenas.service;
 
-import com.projetoWeb.Arenas.controller.dto.CreateMatchDto;
 import com.projetoWeb.Arenas.model.Match;
-import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.repository.MatchRepository;
-import com.projetoWeb.Arenas.security.UserDetailsImpl;
 import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 

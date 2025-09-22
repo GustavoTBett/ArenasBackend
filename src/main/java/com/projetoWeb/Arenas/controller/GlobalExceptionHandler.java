@@ -1,9 +1,9 @@
 package com.projetoWeb.Arenas.controller;
 
 import com.projetoWeb.Arenas.service.exception.AlreadyExistsEmailUserException;
+import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
 import com.projetoWeb.Arenas.service.exception.RefreshTokenExpiredExpection;
 import com.projetoWeb.Arenas.service.exception.RefreshTokenNotExistsException;
-import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;

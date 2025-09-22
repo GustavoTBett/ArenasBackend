@@ -7,19 +7,15 @@ import com.projetoWeb.Arenas.service.exception.RefreshTokenExpiredExpection;
 import com.projetoWeb.Arenas.service.exception.RefreshTokenNotExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,6 +29,9 @@ public class TokenService {
     private JwtEncoder jwtEncoder;
 
     @Autowired
+    private JwtDecoder jwtDecoder;
+
+    @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
     @Autowired
@@ -43,37 +42,33 @@ public class TokenService {
     private long refreshTokenExpirationDays = 7;
 
     public String generateToken(String email, Collection<? extends GrantedAuthority> authorities) {
-        var now = Instant.now();
+        Instant now = Instant.now();
 
-        var claims = JwtClaimsSet.builder()
+        List<String> roles = authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
+        JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("arenas_backend")
                 .subject(email)
                 .issuedAt(now)
                 .expiresAt(now.plus(accessTokenExpirationMinutes, ChronoUnit.MINUTES))
-                .claim("scope", authorities)
+                .claim("scope", String.join(" ", roles))
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
-    public ResponseCookie generateResponseCookieLogin(String jwt) {
-        return ResponseCookie.from("jwt-token", jwt)
-                .httpOnly(true)       // Impede acesso via JavaScript
-                .secure(true)         // Enviar apenas em HTTPS (essencial em produção)
-                .path("/")            // Válido para todas as rotas da aplicação
-                .maxAge(accessTokenExpirationMinutes * 60)    // Tempo de vida do cookie (em segundos)
-                .sameSite("Lax")      // Proteção contra CSRF. 'Strict' é mais seguro, mas 'Lax' é um bom padrão para SPAs.
-                .build();
-    }
+    public Jwt validateToken(String token) {
+        try {
+            if (token == null) {
+                throw new RuntimeException("Token não pode ser nulo");
+            }
 
-    public ResponseCookie generateResponseCookieLogout() {
-        return ResponseCookie.from("jwt-token", "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(0) // Instruí o navegador a apagar o cookie imediatamente
-                .sameSite("Lax")
-                .build();
+            return jwtDecoder.decode(token);
+        } catch (Exception e) {
+            throw new RuntimeException("Token inválido");
+        }
     }
 
     public void invalidateRefreshToken(String token) {
@@ -120,7 +115,7 @@ public class TokenService {
                 .build();
     }
 
-    public ResponseCookie validateRefreshToken(String token) {
+    public String validateRefreshTokenReturnAccessToken(String token) {
         Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByToken(token);
 
         if (refreshTokenOpt.isEmpty()) {
@@ -133,13 +128,7 @@ public class TokenService {
             throw new RefreshTokenExpiredExpection("O refresh token está expirado");
         }
 
-        return this.createCookieToken(refreshToken);
+        return this.generateToken(refreshToken.getUser().getEmail(), refreshToken.getUser().getAuthorities());
     }
 
-    private ResponseCookie createCookieToken(RefreshToken refreshToken) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(refreshToken.getUser().getEmail());
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        String newAccessToken = this.generateToken(authentication.getName(), authentication.getAuthorities());
-        return this.generateResponseCookieLogin(newAccessToken);
-    }
 }

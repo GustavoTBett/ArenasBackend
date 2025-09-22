@@ -4,7 +4,6 @@ import com.projetoWeb.Arenas.controller.dto.CreateUserDto;
 import com.projetoWeb.Arenas.controller.dto.LoginRequestDto;
 import com.projetoWeb.Arenas.controller.dto.ResponseUserDto;
 import com.projetoWeb.Arenas.controller.dto.UpdateUserDto;
-import com.projetoWeb.Arenas.model.RefreshToken;
 import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.service.TokenService;
 import com.projetoWeb.Arenas.service.UserService;
@@ -18,12 +17,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
@@ -37,9 +36,6 @@ public class UserController {
 
     @Autowired
     private TokenService tokenService;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     @PostMapping()
     public ResponseEntity create(@RequestBody CreateUserDto dto) {
@@ -78,13 +74,13 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails instanceof User) {
-            User user = (User) userDetails;
+    public ResponseEntity getCurrentUser(@AuthenticationPrincipal String email) {
+        if (email != null && !email.equals("anonymousUser")) {
+            User user = userService.getUserByEmail(email);
             ResponseUserDto responseUserDto = ResponseUserDto.builder()
-                    .email(user.getEmail())
-                    .firstName(user.getFirstName())
+                    .email(email)
                     .role(user.getRole())
+                    .firstName(user.getFirstName())
                     .build();
             return ResponseEntity.ok(responseUserDto);
         }
@@ -100,22 +96,23 @@ public class UserController {
         String token = tokenService.generateToken(auth.getName(), auth.getAuthorities());
         String refreshToken = tokenService.generateAndSaveRefreshToken(auth.getName());
 
-        ResponseCookie accessTokenCookie = tokenService.generateResponseCookieLogin(token);
         ResponseCookie refreshTokenCookie = tokenService.createRefreshTokenCookie(refreshToken);
+        Map<String, String> accessToken = new HashMap<>();
+        accessToken.put("accessToken", token);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                .body("Login bem-sucedido!");
+                .body(accessToken);
     }
 
-    @PostMapping("/refresh-token")
+    @GetMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@CookieValue(name = "refresh-token") String refreshToken) {
-        ResponseCookie responseCookie = tokenService.validateRefreshToken(refreshToken);
+        String token = tokenService.validateRefreshTokenReturnAccessToken(refreshToken);
+        Map<String, String> accessToken = new HashMap<>();
+        accessToken.put("accessToken", token);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                .build();
+                .body(accessToken);
     }
 
     @PostMapping("/logout")
@@ -124,11 +121,9 @@ public class UserController {
             tokenService.invalidateRefreshToken(refreshToken);
         }
 
-        ResponseCookie accessTokenCookie = tokenService.generateResponseCookieLogout();
         ResponseCookie refreshTokenCookie = tokenService.generateResponseRefreshTokeCookieLogout();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .body("Logout bem-sucedido!");
     }
