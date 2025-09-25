@@ -82,6 +82,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/user/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/refresh-token").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(e -> e

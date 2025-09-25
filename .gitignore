@@ -1,10 +1,11 @@
 HELP.md
 .env
 target/
+docker-compose-prod.yml
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-/src/main/resources/application-prod.properties
+/src/main/resources/application-test.properties
 
 ### STS ###
 .apt_generated

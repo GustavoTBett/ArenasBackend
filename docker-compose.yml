@@ -5,33 +5,36 @@ services:
       dockerfile: Dockerfile
     hostname: api
     networks:
-      - internal
       - api-network
     restart: always
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9999/actuator/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
-    depends_on:
-      postgres:
-        condition: service_healthy
+      start_period: 40s
     environment:
       - SPRING_JPA_SHOW_SQL=false
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/arenas
-      - SPRING_DATASOURCE_USERNAME=arenas_user
-      - SPRING_DATASOURCE_PASSWORD=arenas_pass
+      - SPRING_DATASOURCE_URL=x
+      - SPRING_DATASOURCE_USERNAME=x
+      - SPRING_DATASOURCE_PASSWORD=x
+      - FRONT_URL=x
+      - GOOGLE_CLIENT_ID=x
+      - GOOGLE_CLIENT_SECRET=x
+    deploy:
+      resources:
+        limits:
+          cpus: "0.6"
+          memory: "500MB"
 
   nginx:
     image: nginx:1.28.0-alpine
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
-      - "9999:9999"
+      - "9090:9090"
     networks:
       - api-network
-      - internal
     depends_on:
       api:
         condition: service_healthy
@@ -41,30 +44,6 @@ services:
           cpus: "0.2"
           memory: "20MB"
 
-  postgres:
-    image: postgres:alpine
-    hostname: postgres
-    restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: arenas
-      POSTGRES_USER: arenas_user
-      POSTGRES_PASSWORD: arenas_pass
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U arenas_user -d arenas" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
-
-volumes:
-  postgres_data:
-
 networks:
-  internal:
-    driver: bridge
   api-network:
     driver: bridge

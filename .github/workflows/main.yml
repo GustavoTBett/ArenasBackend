@@ -1,0 +1,35 @@
+name: build and deploy spring-api
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    name: build and deploy spring-api
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: login to docker hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Generate timestamp-based tag
+        id: vars
+        run: |
+          VERSION=$(date +'%Y%m%d-%H%M%S')
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          dockerfile: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/arenas-backend:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/arenas-backend:${{ steps.vars.outputs.version }}
