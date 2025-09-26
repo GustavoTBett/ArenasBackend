@@ -15,17 +15,14 @@ services:
       start_period: 40s
     environment:
       - SPRING_JPA_SHOW_SQL=false
-      - SPRING_DATASOURCE_URL=x
-      - SPRING_DATASOURCE_USERNAME=x
-      - SPRING_DATASOURCE_PASSWORD=x
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/arenas
+      - SPRING_DATASOURCE_USERNAME=arenas_user
+      - SPRING_DATASOURCE_PASSWORD=arenas_pass
       - FRONT_URL=x
       - GOOGLE_CLIENT_ID=x
       - GOOGLE_CLIENT_SECRET=x
-    deploy:
-      resources:
-        limits:
-          cpus: "0.6"
-          memory: "500MB"
+    mem_limit: 1024m
+    cpus: 2.0
 
   nginx:
     image: nginx:1.28.0-alpine
@@ -38,11 +35,35 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: "0.2"
-          memory: "20MB"
+    mem_limit: 128m
+    cpus: 0.2
+
+  postgres:
+    image: postgres:alpine
+    hostname: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    networks:
+      - internal
+      - api-network
+    environment:
+      POSTGRES_DB: arenas
+      POSTGRES_USER: arenas_user
+      POSTGRES_PASSWORD: arenas_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U arenas_user -d arenas" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    mem_limit: 512m
+    cpus: 0.5
+
+volumes:
+  postgres_data:
 
 networks:
   api-network:
