@@ -15,9 +15,9 @@ services:
       start_period: 40s
     environment:
       - SPRING_JPA_SHOW_SQL=false
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/arenas
-      - SPRING_DATASOURCE_USERNAME=arenas_user
-      - SPRING_DATASOURCE_PASSWORD=arenas_pass
+      - SPRING_DATASOURCE_URL=x
+      - SPRING_DATASOURCE_USERNAME=x
+      - SPRING_DATASOURCE_PASSWORD=x
       - FRONT_URL=x
       - GOOGLE_CLIENT_ID=x
       - GOOGLE_CLIENT_SECRET=x
@@ -48,9 +48,9 @@ services:
       - internal
       - api-network
     environment:
-      POSTGRES_DB: arenas
-      POSTGRES_USER: arenas_user
-      POSTGRES_PASSWORD: arenas_pass
+      POSTGRES_DB: x
+      POSTGRES_USER: x
+      POSTGRES_PASSWORD: x
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
