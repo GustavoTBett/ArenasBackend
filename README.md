@@ -19,6 +19,19 @@ Sistema backend para o Arenas — plataforma web responsiva para criação e ger
 
 ## Como rodar o projeto
 
+No seu servidor Ubuntu:
+
+openssl genpkey -algorithm RSA -out private.key -pkeyopt rsa_keygen_bits:2048
+
+
+Cria private.key no formato PKCS#8, compatível com Spring.
+
+2️⃣ Gerar a chave pública correspondente
+openssl rsa -pubout -in private.key -out public.key
+
+
+Cria public.key em PEM X.509, compatível com Spring Security.
+
 ### Pré-requisitos
 
 - Docker instalado e em funcionamento
