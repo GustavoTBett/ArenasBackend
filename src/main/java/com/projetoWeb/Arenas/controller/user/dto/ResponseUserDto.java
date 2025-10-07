@@ -1,6 +1,7 @@
-package com.projetoWeb.Arenas.controller.dto;
+package com.projetoWeb.Arenas.controller.user.dto;
 
 import com.projetoWeb.Arenas.model.enums.PermissaoEnums;
+
 import lombok.Builder;
 import lombok.Data;
 

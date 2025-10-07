@@ -1,11 +1,7 @@
 package com.projetoWeb.Arenas.security;
 
-import com.projetoWeb.Arenas.model.User;
-import com.projetoWeb.Arenas.service.TokenService;
-import com.projetoWeb.Arenas.service.UserService;
-import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -14,7 +10,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
-import java.io.IOException;
+import com.projetoWeb.Arenas.model.User;
+import com.projetoWeb.Arenas.service.auth.TokenService;
+import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
+import com.projetoWeb.Arenas.service.user.UserService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
