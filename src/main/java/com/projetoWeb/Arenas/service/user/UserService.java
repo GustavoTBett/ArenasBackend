@@ -1,24 +1,26 @@
-package com.projetoWeb.Arenas.service;
-
-import com.projetoWeb.Arenas.controller.dto.CreateUserDto;
-import com.projetoWeb.Arenas.controller.dto.UpdateUserDto;
-import com.projetoWeb.Arenas.model.User;
-import com.projetoWeb.Arenas.model.enums.PermissaoEnums;
-import com.projetoWeb.Arenas.repository.UserRepository;
-import com.projetoWeb.Arenas.service.exception.AlreadyExistsEmailUserException;
-import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
+package com.projetoWeb.Arenas.service.user;
 
 import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.projetoWeb.Arenas.controller.user.dto.CreateUserDto;
+import com.projetoWeb.Arenas.controller.user.dto.UpdateUserDto;
+import com.projetoWeb.Arenas.model.User;
+import com.projetoWeb.Arenas.model.enums.PermissaoEnums;
+import com.projetoWeb.Arenas.repository.UserRepository;
+import com.projetoWeb.Arenas.service.exception.AlreadyExistsEmailUserException;
+import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
+
+import jakarta.transaction.Transactional;
+
 @Service
 public class UserService {
-    
+
     @Autowired
     private UserRepository userRepository;
 
@@ -37,7 +39,6 @@ public class UserService {
                 .password(passwordEncoder.encode(createUserDto.password()))
                 .role(PermissaoEnums.BASICO)
                 .build();
-
         user = userRepository.save(user);
 
         return user.getId();
@@ -45,14 +46,13 @@ public class UserService {
 
     @Transactional
     public User createUserByGoogle(String email) {
-        String teste = UUID.randomUUID().toString();
-        System.out.println(teste);
+        String passoword = UUID.randomUUID().toString();
+
         User user = User.builder()
                 .email(email)
-                .password(passwordEncoder.encode(teste))
+                .password(passwordEncoder.encode(passoword))
                 .role(PermissaoEnums.BASICO)
                 .build();
-
         user = userRepository.save(user);
 
         return user;
@@ -64,7 +64,6 @@ public class UserService {
         if (optionalUser.isPresent()) {
             return optionalUser.get();
         }
-
         throw new EntityNotExistsException("O usuário com o id informado não existe na base de dados");
     }
 
@@ -74,34 +73,31 @@ public class UserService {
         if (optionalUser.isPresent()) {
             return optionalUser.get();
         }
-
         throw new EntityNotExistsException("O usuário com o email informado não existe na base de dados");
     }
 
     @Transactional
     public Long updateUser(Long userId, UpdateUserDto updateUserDto) {
         User user = getUserById(userId);
-
         user.setBirthDate(updateUserDto.birthDate());
         user.setPhone(updateUserDto.phone());
         user.setProfileDescription(updateUserDto.profileDescripton());
         user.setRolePlayer(updateUserDto.rolePlayer());
         user.setFirstName(updateUserDto.firstName());
         user.setLastName(updateUserDto.lastName());
+
         String base64Pic = updateUserDto.profilePic();
 
         if (base64Pic != null && !base64Pic.isEmpty()) {
             if (base64Pic.startsWith("data:image")) {
                 base64Pic = base64Pic.split(",")[1];
             }
-
             byte[] imageBytes = Base64.getDecoder().decode(base64Pic);
-            
-            // Validar tamanho da imagem (máximo 5MB)
+
+            // Verifica tamanho da imagem (máximo 5MB)
             if (imageBytes.length > 5 * 1024 * 1024) {
                 throw new IllegalArgumentException("Imagem não pode exceder 5MB");
             }
-
             user.setProfilePic(imageBytes);
         }
 
@@ -113,7 +109,6 @@ public class UserService {
     @Transactional
     public void deleteUser(Long id) {
         User user = getUserById(id);
-
         userRepository.delete(user);
     }
 }
