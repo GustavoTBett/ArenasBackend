@@ -1,6 +1,8 @@
 package com.projetoWeb.Arenas.service;
 
+import com.projetoWeb.Arenas.controller.dto.CreateMatchDto;
 import com.projetoWeb.Arenas.model.Match;
+import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.repository.MatchRepository;
 import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,18 +36,19 @@ public class MatchService {
         throw new EntityNotExistsException("Match Not Found");
     }
 
-//    public Match saveMatchAndamento(CreateMatchDto matchDto){
-//        User user = userDetailsService.
-//        Match match = Match.builder()
-//                .matchDate(matchDto.matchData())
-//                .title(matchDto.text())
-//                .maxPlayers(matchDto.maxPlayers())
-//                .description(matchDto.description())
-//                .createrUserId(matchDto.creatorUserId())
-//
-//                build();
-//        return matchRepository.save(match);
-//    }
+    public Match saveMatchAndamento(CreateMatchDto matchDto){
+        User user = userService.getUserById(matchDto.creatorUserId());
+
+        Match match = Match.builder()
+                .matchDate(matchDto.matchData())
+                .title(matchDto.text())
+                .maxPlayers(matchDto.maxPlayers())
+                .description(matchDto.description())
+                .createrUserId(user)
+                .build();
+
+        return matchRepository.save(match);
+    }
 
     public Match update(Match match){
         return matchRepository.save(match);
