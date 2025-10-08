@@ -1,11 +1,8 @@
 package com.projetoWeb.Arenas.security;
 
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
-import com.nimbusds.jose.proc.SecurityContext;
-import com.projetoWeb.Arenas.security.cookie.StatelessAuthorizationRequestRepository;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,8 +25,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.proc.SecurityContext;
+import com.projetoWeb.Arenas.security.cookie.StatelessAuthorizationRequestRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -71,23 +72,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   GoogleOAuth2SuccessHandler successHandler,
-                                                   AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository,
-                                                   JwtFilter jwtFilter) throws Exception {
+            GoogleOAuth2SuccessHandler successHandler,
+            AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository,
+            JwtFilter jwtFilter) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/logout").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/user/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/refresh-token").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/user/me").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(e -> e
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                )
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(successHandler)
@@ -95,17 +95,15 @@ public class SecurityConfig {
                             response.sendRedirect("/login?error=true");
                         })
                         .authorizationEndpoint(endpoint -> endpoint
-                                .authorizationRequestRepository(authorizationRequestRepository)
-                        )
-                )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-        ;
+                                .authorizationRequestRepository(authorizationRequestRepository)))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 }

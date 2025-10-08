@@ -7,7 +7,8 @@ import com.projetoWeb.Arenas.controller.dto.UpdateUserDto;
 import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.service.TokenService;
 import com.projetoWeb.Arenas.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -16,7 +17,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -26,19 +26,15 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private TokenService tokenService;
+    private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final TokenService tokenService;
 
     @PostMapping()
-    public ResponseEntity create(@RequestBody CreateUserDto dto) {
+    public ResponseEntity<Void> create(@Valid @RequestBody CreateUserDto dto) {
         Long userIdCreated = userService.createdUser(dto);
 
         URI location = ServletUriComponentsBuilder
@@ -58,23 +54,23 @@ public class UserController {
 //    }
 
     @GetMapping("/{id}")
-    public ResponseEntity listUserById(@PathVariable("id") Long id) {
+    public ResponseEntity<User> listUserById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity updateUser(@PathVariable("id") Long id, @RequestBody UpdateUserDto updateUserDto) {
+    public ResponseEntity<Long> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserDto updateUserDto) {
         return ResponseEntity.ok(userService.updateUser(id, updateUserDto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteUser(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")
-    public ResponseEntity getCurrentUser(@AuthenticationPrincipal String email) {
+    public ResponseEntity<ResponseUserDto> getCurrentUser(@AuthenticationPrincipal String email) {
         if (email != null && !email.equals("anonymousUser")) {
             User user = userService.getUserByEmail(email);
             ResponseUserDto responseUserDto = ResponseUserDto.builder()
@@ -89,7 +85,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody LoginRequestDto loginRequest) {
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequestDto loginRequest) {
         UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password());
         Authentication auth = this.authenticationManager.authenticate(usernamePassword);
 
@@ -106,7 +102,7 @@ public class UserController {
     }
 
     @GetMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@CookieValue(name = "refresh-token") String refreshToken) {
+    public ResponseEntity<Map<String, String>> refreshToken(@CookieValue(name = "refresh-token") String refreshToken) {
         String token = tokenService.validateRefreshTokenReturnAccessToken(refreshToken);
         Map<String, String> accessToken = new HashMap<>();
         accessToken.put("accessToken", token);
@@ -116,7 +112,7 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@CookieValue(name = "refresh-token", required = false) String refreshToken) {
+    public ResponseEntity<String> logout(@CookieValue(name = "refresh-token", required = false) String refreshToken) {
         if (refreshToken != null) {
             tokenService.invalidateRefreshToken(refreshToken);
         }

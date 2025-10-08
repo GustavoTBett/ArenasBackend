@@ -96,6 +96,11 @@ public class UserService {
             }
 
             byte[] imageBytes = Base64.getDecoder().decode(base64Pic);
+            
+            // Validar tamanho da imagem (máximo 5MB)
+            if (imageBytes.length > 5 * 1024 * 1024) {
+                throw new IllegalArgumentException("Imagem não pode exceder 5MB");
+            }
 
             user.setProfilePic(imageBytes);
         }

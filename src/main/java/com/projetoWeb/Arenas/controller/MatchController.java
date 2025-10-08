@@ -3,7 +3,7 @@ package com.projetoWeb.Arenas.controller;
 import com.projetoWeb.Arenas.controller.dto.CreateMatchDto;
 import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.service.MatchService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,13 +11,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/match")
+@RequiredArgsConstructor
 public class MatchController {
 
-    @Autowired
-    private MatchService matchService;
+    private final MatchService matchService;
 
     @GetMapping("/getById/{id}")
-    public ResponseEntity getById(@PathVariable Long id){
+    public ResponseEntity<Match> getById(@PathVariable Long id){
         return ResponseEntity.ok(matchService.findById(id));
     }
 
