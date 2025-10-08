@@ -1,6 +1,6 @@
 package com.projetoWeb.Arenas.service;
 
-import com.projetoWeb.Arenas.controller.dto.CreateMatchDto;
+import com.projetoWeb.Arenas.controller.dto.match.CreateMatchDto;
 import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.repository.MatchRepository;

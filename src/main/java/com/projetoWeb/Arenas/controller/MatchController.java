@@ -1,6 +1,6 @@
 package com.projetoWeb.Arenas.controller;
 
-import com.projetoWeb.Arenas.controller.dto.CreateMatchDto;
+import com.projetoWeb.Arenas.controller.dto.match.CreateMatchDto;
 import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.service.MatchService;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +28,7 @@ public class MatchController {
 
     @PostMapping("/andamento")
     public ResponseEntity<Match> createMatchAndamento(@RequestBody CreateMatchDto matchDto){
-//        return ResponseEntity.ok(matchService.saveMatchAndamento(matchDto));
-        return null;
+        return ResponseEntity.ok(matchService.saveMatchAndamento(matchDto));
     }
 
     @PutMapping

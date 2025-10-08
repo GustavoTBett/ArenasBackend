@@ -1,4 +1,4 @@
-package com.projetoWeb.Arenas.controller.dto;
+package com.projetoWeb.Arenas.controller.dto.match;
 
 import java.time.ZonedDateTime;
 
