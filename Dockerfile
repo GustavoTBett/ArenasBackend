@@ -1,4 +1,6 @@
 FROM maven:3.9.8-eclipse-temurin-21 AS builder
+ARG SENTRY_AUTH_TOKEN
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
