@@ -8,7 +8,8 @@ FROM eclipse-temurin:21-jre-alpine
 RUN apk add --no-cache curl
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
-COPY sentry-opentelemetry-agent-8.23.0.jar sentry-agent.jar
+RUN curl -L -o /app/sentry-agent.jar \
+  https://repo1.maven.org/maven2/io/sentry/sentry-opentelemetry-agent/8.23.0/sentry-opentelemetry-agent-8.23.0.jar
 ENV SENTRY_AUTO_INIT=false
 EXPOSE 8080
 ENTRYPOINT ["java", "-javaagent:/app/sentry-agent.jar", "-jar", "app.jar"]
