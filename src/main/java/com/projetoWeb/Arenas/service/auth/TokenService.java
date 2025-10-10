@@ -1,16 +1,4 @@
-package com.projetoWeb.Arenas.service;
-
-import com.projetoWeb.Arenas.model.RefreshToken;
-import com.projetoWeb.Arenas.model.User;
-import com.projetoWeb.Arenas.repository.RefreshTokenRepository;
-import com.projetoWeb.Arenas.service.exception.RefreshTokenExpiredExpection;
-import com.projetoWeb.Arenas.service.exception.RefreshTokenNotExistsException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.oauth2.jwt.*;
-import org.springframework.stereotype.Service;
+package com.projetoWeb.Arenas.service.auth;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -18,6 +6,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.stereotype.Service;
+
+import com.projetoWeb.Arenas.model.RefreshToken;
+import com.projetoWeb.Arenas.model.User;
+import com.projetoWeb.Arenas.repository.RefreshTokenRepository;
+import com.projetoWeb.Arenas.service.exception.RefreshTokenExpiredExpection;
+import com.projetoWeb.Arenas.service.exception.RefreshTokenNotExistsException;
+import com.projetoWeb.Arenas.service.user.UserService;
 
 @Service
 public class TokenService {
@@ -33,9 +38,6 @@ public class TokenService {
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     private long accessTokenExpirationMinutes = 15;
 
@@ -64,7 +66,6 @@ public class TokenService {
             if (token == null) {
                 throw new RuntimeException("Token não pode ser nulo");
             }
-
             return jwtDecoder.decode(token);
         } catch (Exception e) {
             throw new RuntimeException("Token inválido");
@@ -80,6 +81,7 @@ public class TokenService {
 
         Optional<RefreshToken> optionalRefreshToken = this.refreshTokenRepository.findByUser(user);
         RefreshToken refreshToken;
+
         if (optionalRefreshToken.isPresent()) {
             refreshToken = optionalRefreshToken.get();
         } else {
@@ -89,9 +91,8 @@ public class TokenService {
 
         refreshToken.setExpiryDate(Instant.now().plus(refreshTokenExpirationDays, ChronoUnit.DAYS));
         refreshToken.setToken(UUID.randomUUID().toString());
-
-
         refreshTokenRepository.save(refreshToken);
+
         return refreshToken.getToken();
     }
 

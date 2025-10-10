@@ -1,14 +1,15 @@
 package com.projetoWeb.Arenas.controller;
 
-import com.projetoWeb.Arenas.service.exception.AlreadyExistsEmailUserException;
-import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
-import com.projetoWeb.Arenas.service.exception.RefreshTokenExpiredExpection;
-import com.projetoWeb.Arenas.service.exception.RefreshTokenNotExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import com.projetoWeb.Arenas.service.exception.AlreadyExistsEmailUserException;
+import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
+import com.projetoWeb.Arenas.service.exception.RefreshTokenExpiredExpection;
+import com.projetoWeb.Arenas.service.exception.RefreshTokenNotExistsException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
