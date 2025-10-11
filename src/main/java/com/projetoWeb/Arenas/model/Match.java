@@ -40,5 +40,5 @@ public class Match {
 
     @Column(nullable = false)
     @Convert(converter = MatchStatusConverter.class)
-    private MatchStatus matchStatus = MatchStatus.AGENDADA;
+    private MatchStatus matchStatus = MatchStatus.CONFIRMADA;
 }

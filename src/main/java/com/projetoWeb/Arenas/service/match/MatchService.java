@@ -48,4 +48,8 @@ public class MatchService {
     public void deleteById(long id) {
         matchRepository.deleteById(id);
     }
+
+    public List<Match> findByStatus(String status) {
+        return matchRepository.findByMatchStatus(status);
+    }
 }
