@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.projetoWeb.Arenas.model.Match;
+import com.projetoWeb.Arenas.model.enums.MatchStatus;
 import com.projetoWeb.Arenas.repository.MatchRepository;
 import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
 
@@ -49,7 +50,11 @@ public class MatchService {
         matchRepository.deleteById(id);
     }
 
-    public List<Match> findByStatus(String status) {
+    public List<Match> findByStatus(MatchStatus status) {
         return matchRepository.findByMatchStatus(status);
+    }
+
+    public List<Match> findByUserAndMatchStatus(Long userId, MatchStatus status) {
+        return matchRepository.findByUserAndMatchStatus(userId, status);
     }
 }

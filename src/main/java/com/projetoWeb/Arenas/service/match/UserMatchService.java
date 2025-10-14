@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.projetoWeb.Arenas.model.UserMatch;
+import com.projetoWeb.Arenas.model.enums.UserMatchStatus;
 import com.projetoWeb.Arenas.repository.UserMatchRepository;
 import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
 
@@ -32,6 +33,10 @@ public class UserMatchService {
     return userMatchRepository.findByMatchId(matchId);
   }
 
+  public List<UserMatch> findByMatchIdAndUserMatchStatus(Long matchId, UserMatchStatus status) {
+    return userMatchRepository.findByMatchIdAndUserMatchStatus(matchId, status);
+  }
+
   public UserMatch save(UserMatch userMatch) {
     return userMatchRepository.save(userMatch);
   }
@@ -50,6 +55,10 @@ public class UserMatchService {
 
   public Long countByMatchId(Long matchId) {
     return Long.valueOf(userMatchRepository.findByMatchId(matchId).size());
+  }
+
+  public Long countByMatchIdAndUserMatchStatus(Long matchId, UserMatchStatus status) {
+    return Long.valueOf(userMatchRepository.findByMatchIdAndUserMatchStatus(matchId, status).size());
   }
 
 }

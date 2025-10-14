@@ -15,7 +15,7 @@ public class ResponseDashboardDto {
   private String date;
   private Long maxPlayers;
   private Long currentPlayers;
-  private MatchStatus status;
+  private String status;
 
   public Long getId() {
     return id;
@@ -25,11 +25,11 @@ public class ResponseDashboardDto {
     this.id = id;
   }
 
-  public MatchStatus getStatus() {
+  public String getStatus() {
     return status;
   }
 
-  public void setStatus(MatchStatus status) {
+  public void setStatus(String status) {
     this.status = status;
   }
 
