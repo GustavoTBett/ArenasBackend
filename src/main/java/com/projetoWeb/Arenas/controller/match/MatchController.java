@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.projetoWeb.Arenas.controller.match.dto.CreateMatchDto;
 import com.projetoWeb.Arenas.controller.match.dto.DeleteMatchDto;
-import com.projetoWeb.Arenas.controller.match.dto.UpdateMatchDto;
+import com.projetoWeb.Arenas.controller.match.dto.MatchDto;
 import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.service.match.MatchService;
 
@@ -27,7 +26,7 @@ public class MatchController {
 
     private final MatchService matchService;
 
-    @GetMapping("/getById/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Match> getById(@PathVariable Long id) {
         return ResponseEntity.ok(matchService.findById(id));
     }
@@ -38,18 +37,18 @@ public class MatchController {
     }
 
     @PostMapping
-    public ResponseEntity<Match> createMatch(@RequestBody CreateMatchDto matchDto){
+    public ResponseEntity<Match> createMatch(@RequestBody MatchDto matchDto){
         return ResponseEntity.ok(matchService.create(matchDto));
     }
 
-    @PutMapping
-    public ResponseEntity<Match> updateMatch(@RequestBody UpdateMatchDto matchDto){
-        return ResponseEntity.ok(matchService.update(matchDto));
+    @PutMapping("/{id}")
+    public ResponseEntity<Match> updateMatch(@PathVariable Long id, @RequestBody MatchDto matchDto){
+        return ResponseEntity.ok(matchService.update(id, matchDto));
     }
 
-    @DeleteMapping
-    public ResponseEntity<String> deleteMatch(@RequestBody DeleteMatchDto matchDto){
-        matchService.delete(matchDto);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteMatch(@PathVariable Long id, @RequestBody DeleteMatchDto matchDto){
+        matchService.delete(id, matchDto);
 
         return ResponseEntity.ok().body("Deletado com sucesso");
     }

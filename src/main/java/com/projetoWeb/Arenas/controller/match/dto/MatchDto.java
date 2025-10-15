@@ -2,8 +2,7 @@ package com.projetoWeb.Arenas.controller.match.dto;
 
 import java.time.ZonedDateTime;
 
-public record UpdateMatchDto(Long id,
-                             ZonedDateTime matchData,
+public record MatchDto(ZonedDateTime matchData,
                              String text,
                              Long maxPlayers,
                              String description,
