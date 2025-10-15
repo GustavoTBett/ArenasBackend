@@ -23,6 +23,9 @@ public class MatchService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private MatchParameterService matchParameterService;
+
     public List<Match> findAll() {
         return matchRepository.findAll();
     }
@@ -41,12 +44,15 @@ public class MatchService {
         Match match = Match.builder()
                 .matchDate(matchDto.matchData())
                 .title(matchDto.text())
-                .maxPlayers(matchDto.maxPlayers())
                 .description(matchDto.description())
+                .maxPlayers(matchDto.maxPlayers())
                 .createrUser(user)
                 .build();
+        Match savedMatch = matchRepository.save(match);
 
-        return matchRepository.save(match);
+        matchParameterService.create(savedMatch.getId(), matchDto.matchParameterDto());
+
+        return savedMatch;
     }
 
     public Match update(Long id, MatchDto matchDto){
@@ -61,8 +67,11 @@ public class MatchService {
                 .description(matchDto.description())
                 .createrUser(user)
                 .build();
+        Match savedMatch = matchRepository.save(match);
 
-        return matchRepository.save(match);
+        matchParameterService.updateByMatchId(savedMatch.getId(), matchDto.matchParameterDto());
+
+        return savedMatch;
     }
 
     public void delete(Long id, DeleteMatchDto matchDto){
@@ -74,5 +83,6 @@ public class MatchService {
         }
 
         matchRepository.deleteById(id);
+        matchParameterService.deleteByMatchId(id);
     }
 }
