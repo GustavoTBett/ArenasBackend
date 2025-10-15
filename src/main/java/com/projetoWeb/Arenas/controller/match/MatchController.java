@@ -28,8 +28,8 @@ public class MatchController {
     private final MatchService matchService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Match> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(matchService.findById(id));
+    public ResponseEntity<Match> getById(@PathVariable Long matchId) {
+        return ResponseEntity.ok(matchService.findById(matchId));
     }
 
     @GetMapping
@@ -43,18 +43,18 @@ public class MatchController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Match> updateMatch(@PathVariable Long id, @RequestBody MatchDto matchDto){
-        return ResponseEntity.ok(matchService.update(id, matchDto));
+    public ResponseEntity<Match> updateMatch(@PathVariable Long matchId, @RequestBody MatchDto matchDto){
+        return ResponseEntity.ok(matchService.update(matchId, matchDto));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Match> cancelMatch(@PathVariable Long id, @RequestBody UserMatchDto matchDto){
-        return ResponseEntity.ok(matchService.cancel(id, matchDto));
+    public ResponseEntity<Match> cancelMatch(@PathVariable Long matchId, @RequestBody UserMatchDto matchDto){
+        return ResponseEntity.ok(matchService.cancel(matchId, matchDto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteMatch(@PathVariable Long id, @RequestBody UserMatchDto matchDto){
-        matchService.delete(id, matchDto);
+    public ResponseEntity<String> deleteMatch(@PathVariable Long matchId, @RequestBody UserMatchDto matchDto){
+        matchService.delete(matchId, matchDto);
 
         return ResponseEntity.ok().body("Deletado com sucesso");
     }
