@@ -1,4 +1,4 @@
-package com.projetoWeb.Arenas.controller.dto.match;
+package com.projetoWeb.Arenas.controller.match.dto;
 
 
 public record DeleteMatchDto(Long id,

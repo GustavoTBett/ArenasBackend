@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.projetoWeb.Arenas.controller.match.dto.CreateMatchDto;
+import com.projetoWeb.Arenas.controller.match.dto.DeleteMatchDto;
+import com.projetoWeb.Arenas.controller.match.dto.UpdateMatchDto;
 import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.service.match.MatchService;
 
@@ -35,20 +37,20 @@ public class MatchController {
         return ResponseEntity.ok(matchService.findAll());
     }
 
-    @PostMapping("/andamento")
-    public ResponseEntity<Match> createMatchAndamento(@RequestBody CreateMatchDto matchDto) {
-        // return ResponseEntity.ok(matchService.saveMatchAndamento(matchDto));
-        return null;
+    @PostMapping
+    public ResponseEntity<Match> createMatch(@RequestBody CreateMatchDto matchDto){
+        return ResponseEntity.ok(matchService.create(matchDto));
     }
 
     @PutMapping
-    public ResponseEntity<Match> updateMatch(@RequestBody Match match) {
-        return ResponseEntity.ok(matchService.update(match));
+    public ResponseEntity<Match> updateMatch(@RequestBody UpdateMatchDto matchDto){
+        return ResponseEntity.ok(matchService.update(matchDto));
     }
 
     @DeleteMapping
-    public ResponseEntity<Match> deleteMatch(@RequestBody Match match) {
-        // return ResponseEntity.ok(matchService.)
-        return null;
+    public ResponseEntity<String> deleteMatch(@RequestBody DeleteMatchDto matchDto){
+        matchService.delete(matchDto);
+
+        return ResponseEntity.ok().body("Deletado com sucesso");
     }
 }

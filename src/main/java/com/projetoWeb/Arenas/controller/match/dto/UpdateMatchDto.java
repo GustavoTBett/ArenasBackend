@@ -1,4 +1,4 @@
-package com.projetoWeb.Arenas.controller.dto.match;
+package com.projetoWeb.Arenas.controller.match.dto;
 
 import java.time.ZonedDateTime;
 
@@ -12,5 +12,12 @@ public record UpdateMatchDto(Long id,
                              String match_level,
                              Boolean privateMatch,
                              Boolean notifyUser,
-                             Boolean reocuringMatch) {
+                             Boolean reocuringMatch,
+                             String localName,
+                             String localZipCode,
+                             String localCode,
+                             String localComplement,
+                             String localCity,
+                             String localState,
+                             String localNeighborhood) {
 }
