@@ -26,6 +26,9 @@ public class MatchService {
     @Autowired
     private MatchParameterService matchParameterService;
 
+    @Autowired
+    private LocalMatchService localMatchService;
+
     public List<Match> findAll() {
         return matchRepository.findAll();
     }
@@ -51,6 +54,7 @@ public class MatchService {
         Match savedMatch = matchRepository.save(match);
 
         matchParameterService.create(savedMatch.getId(), matchDto.matchParameterDto());
+        localMatchService.create(savedMatch.getId(), matchDto.localMatchDto());
 
         return savedMatch;
     }
@@ -70,6 +74,7 @@ public class MatchService {
         Match savedMatch = matchRepository.save(match);
 
         matchParameterService.updateByMatchId(savedMatch.getId(), matchDto.matchParameterDto());
+        localMatchService.updateByMatchId(savedMatch.getId(), matchDto.localMatchDto());
 
         return savedMatch;
     }
@@ -84,5 +89,6 @@ public class MatchService {
 
         matchRepository.deleteById(id);
         matchParameterService.deleteByMatchId(id);
+        localMatchService.deleteByMatchId(id);
     }
 }

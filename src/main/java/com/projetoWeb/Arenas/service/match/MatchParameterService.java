@@ -11,14 +11,10 @@ import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.model.MatchParameter;
 import com.projetoWeb.Arenas.model.converter.MatchLevel;
 import com.projetoWeb.Arenas.repository.MatchParameterRepository;
-import com.projetoWeb.Arenas.repository.MatchRepository;
 import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
 
 @Service
 public class MatchParameterService {
-
-    @Autowired
-    private MatchRepository matchRepository;
 
     @Autowired
     private MatchParameterRepository matchParameterRepository;
@@ -26,8 +22,8 @@ public class MatchParameterService {
     @Autowired
     private MatchService matchService;
 
-    public List<Match> findAll() {
-        return matchRepository.findAll();
+    public List<MatchParameter> findAll() {
+        return matchParameterRepository.findAll();
     }
 
     public MatchParameter findById(long id) {

@@ -8,11 +8,5 @@ public record MatchDto(ZonedDateTime matchData,
                              String description,
                              Long creatorUserId,
                              MatchParameterDto matchParameterDto,
-                             String localName,
-                             String localZipCode,
-                             String localCode,
-                             String localComplement,
-                             String localCity,
-                             String localState,
-                             String localNeighborhood) {
+                             LocalMatchDto localMatchDto) {
 }
