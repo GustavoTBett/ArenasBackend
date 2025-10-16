@@ -19,9 +19,6 @@ public class MatchParameterService {
     @Autowired
     private MatchParameterRepository matchParameterRepository;
 
-    @Autowired
-    private MatchService matchService;
-
     public List<MatchParameter> findAll() {
         return matchParameterRepository.findAll();
     }
@@ -44,9 +41,7 @@ public class MatchParameterService {
         throw new EntityNotExistsException("Match Parameter Not Found");
     }
 
-    public MatchParameter create(Long matchId, MatchParameterDto matchParameterDto){
-        Match match = matchService.findById(matchId);
-
+    public MatchParameter create(Match match, MatchParameterDto matchParameterDto){
         MatchParameter matchParameter = MatchParameter.builder()
                 .user_value(matchParameterDto.user_value())
                 .matchLevel(MatchLevel.fromString(matchParameterDto.match_level()))
@@ -58,8 +53,7 @@ public class MatchParameterService {
         return matchParameterRepository.save(matchParameter);
     }
 
-    public MatchParameter updateByMatchId(Long matchId, MatchParameterDto matchParameterDto){
-        Match match = matchService.findById(matchId);
+    public MatchParameter updateByMatchId(Match match, MatchParameterDto matchParameterDto){
         MatchParameter savedMatchParameter = findByMatchId(match.getId());
 
         MatchParameter matchParameter = MatchParameter.builder()
@@ -75,8 +69,7 @@ public class MatchParameterService {
     }
 
     public void deleteByMatchId(Long matchId){
-        Match match = matchService.findById(matchId);
-        MatchParameter savedMatchParameter = findByMatchId(match.getId());
+        MatchParameter savedMatchParameter = findByMatchId(matchId);
 
         matchParameterRepository.deleteById(savedMatchParameter.getId());
     }

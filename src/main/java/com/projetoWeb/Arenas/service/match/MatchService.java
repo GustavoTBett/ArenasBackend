@@ -54,8 +54,8 @@ public class MatchService {
                 .build();
         Match savedMatch = matchRepository.save(match);
 
-        matchParameterService.create(savedMatch.getId(), matchDto.matchParameterDto());
-        localMatchService.create(savedMatch.getId(), matchDto.localMatchDto());
+        matchParameterService.create(savedMatch, matchDto.matchParameterDto());
+        localMatchService.create(savedMatch, matchDto.localMatchDto());
 
         return savedMatch;
     }
@@ -78,8 +78,8 @@ public class MatchService {
                 .build();
         Match savedMatch = matchRepository.save(match);
 
-        matchParameterService.updateByMatchId(savedMatch.getId(), matchDto.matchParameterDto());
-        localMatchService.updateByMatchId(savedMatch.getId(), matchDto.localMatchDto());
+        matchParameterService.updateByMatchId(savedMatch, matchDto.matchParameterDto());
+        localMatchService.updateByMatchId(savedMatch, matchDto.localMatchDto());
 
         return savedMatch;
     }

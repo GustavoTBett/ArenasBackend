@@ -18,9 +18,6 @@ public class LocalMatchService {
     @Autowired
     private LocalMatchRepository localMatchRepository;
 
-    @Autowired
-    private MatchService matchService;
-
     public List<LocalMatch> findAll() {
         return localMatchRepository.findAll();
     }
@@ -43,9 +40,7 @@ public class LocalMatchService {
         throw new EntityNotExistsException("Match Parameter Not Found");
     }
 
-    public LocalMatch create(Long matchId, LocalMatchDto localMatchDto){
-        Match match = matchService.findById(matchId);
-
+    public LocalMatch create(Match match, LocalMatchDto localMatchDto){
         LocalMatch localMatch = LocalMatch.builder()
                 .description(localMatchDto.localName())
                 .zipCode(localMatchDto.localZipCode())
@@ -60,8 +55,7 @@ public class LocalMatchService {
         return localMatchRepository.save(localMatch);
     }
 
-    public LocalMatch updateByMatchId(Long matchId, LocalMatchDto localMatchDto){
-        Match match = matchService.findById(matchId);
+    public LocalMatch updateByMatchId(Match match, LocalMatchDto localMatchDto){
         LocalMatch savedLocalMatch = findByMatchId(match.getId());
 
         LocalMatch localMatch = LocalMatch.builder()
@@ -80,8 +74,7 @@ public class LocalMatchService {
     }
 
     public void deleteByMatchId(Long matchId){
-        Match match = matchService.findById(matchId);
-        LocalMatch savedLocalMatch = findByMatchId(match.getId());
+        LocalMatch savedLocalMatch = findByMatchId(matchId);
 
         localMatchRepository.deleteById(savedLocalMatch.getId());
     }
