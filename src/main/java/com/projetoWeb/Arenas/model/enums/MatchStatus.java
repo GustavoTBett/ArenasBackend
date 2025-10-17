@@ -2,7 +2,6 @@ package com.projetoWeb.Arenas.model.enums;
 
 public enum MatchStatus {
     AGENDADA("Agendada"),
-    EM_ANDAMENTO("Em Andamento"),
     FINALIZADA("Finalizada"),
     CANCELADA("Cancelada");
 

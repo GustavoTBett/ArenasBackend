@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.projetoWeb.Arenas.controller.match.dto.CalendarioMatchDto;
 import com.projetoWeb.Arenas.controller.match.dto.CreateMatchDto;
 import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.service.match.MatchService;
@@ -24,6 +25,11 @@ import lombok.RequiredArgsConstructor;
 public class MatchController {
 
     private final MatchService matchService;
+
+    @GetMapping("/calendario")
+    public ResponseEntity<List<CalendarioMatchDto>> getCalendarioMatches() {
+        return ResponseEntity.ok(matchService.findAllForCalendario());
+    }
 
     @GetMapping("/getById/{id}")
     public ResponseEntity<Match> getById(@PathVariable Long id) {
