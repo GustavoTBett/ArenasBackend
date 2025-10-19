@@ -2,7 +2,6 @@ package com.projetoWeb.Arenas.controller.dashboard;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,11 +22,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DashboardController {
 
-  @Autowired
-  private MatchService matchService;
-
-  @Autowired
-  private UserMatchService userMatchService;
+  private final MatchService matchService;
+  private final UserMatchService userMatchService;
 
   @GetMapping("next-matches/{userId}")
   public ResponseEntity<List<ResponseDashboardDto>> getNextMacths(@PathVariable Long userId) {
