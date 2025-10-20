@@ -12,6 +12,7 @@ import com.projetoWeb.Arenas.controller.match.dto.CalendarioMatchDto;
 import com.projetoWeb.Arenas.model.LocalMatch;
 import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.repository.LocalMatchRepository;
+import com.projetoWeb.Arenas.model.enums.MatchStatus;
 import com.projetoWeb.Arenas.repository.MatchRepository;
 import com.projetoWeb.Arenas.repository.UserMatchRepository;
 import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
@@ -106,5 +107,13 @@ public class MatchService {
             return null;
         }
         return null;
+    }
+
+    public List<Match> findByStatus(MatchStatus status) {
+        return matchRepository.findByMatchStatus(status);
+    }
+
+    public List<Match> findByUserAndMatchStatus(Long userId, MatchStatus status) {
+        return matchRepository.findByUserAndMatchStatus(userId, status);
     }
 }

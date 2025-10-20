@@ -63,6 +63,7 @@ public class UserController {
     if (!"anonymousUser".equals(email)) {
       User user = userService.getUserByEmail(email);
       ResponseUserDto responseUserDto = ResponseUserDto.builder()
+          .id(user.getId())
           .email(email)
           .role(user.getRole())
           .firstName(user.getFirstName())

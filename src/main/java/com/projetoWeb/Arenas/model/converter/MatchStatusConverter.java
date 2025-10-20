@@ -9,15 +9,17 @@ public class MatchStatusConverter implements AttributeConverter<MatchStatus, Str
 
     @Override
     public String convertToDatabaseColumn(MatchStatus attribute) {
-        if (attribute == null) return null;
-        return attribute.getDescricao();
+        if (attribute == null)
+            return null;
+        return attribute.getValue();
     }
 
     @Override
     public MatchStatus convertToEntityAttribute(String dbData) {
-        if (dbData == null) return null;
+        if (dbData == null)
+            return null;
         for (MatchStatus e : MatchStatus.values()) {
-            if (e.getDescricao().equals(dbData)) {
+            if (e.getValue().equals(dbData)) {
                 return e;
             }
         }
