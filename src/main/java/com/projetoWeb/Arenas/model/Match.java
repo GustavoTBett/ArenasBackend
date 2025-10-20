@@ -36,7 +36,7 @@ public class Match {
 
     @JoinColumn(name = "creator_user_id", nullable = false)
     @ManyToOne
-    private User createrUser;
+    private User createrUserId;
 
     @Column(nullable = false)
     @Convert(converter = MatchStatusConverter.class)

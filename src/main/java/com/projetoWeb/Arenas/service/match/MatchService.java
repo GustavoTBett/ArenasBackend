@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.projetoWeb.Arenas.controller.match.dto.CalendarioMatchDto;
+import com.projetoWeb.Arenas.repository.LocalMatchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,7 @@ import com.projetoWeb.Arenas.controller.match.dto.UserMatchDto;
 import com.projetoWeb.Arenas.controller.match.dto.MatchDto;
 import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.model.User;
+import com.projetoWeb.Arenas.model.LocalMatch;
 import com.projetoWeb.Arenas.model.enums.MatchStatus;
 import com.projetoWeb.Arenas.repository.MatchRepository;
 import com.projetoWeb.Arenas.repository.UserMatchRepository;
@@ -33,6 +36,12 @@ public class MatchService {
     @Autowired
     private LocalMatchService localMatchService;
 
+    @Autowired
+    private UserMatchRepository userMatchRepository;
+
+    @Autowired
+    private LocalMatchRepository localMatchRepository;
+
     public List<Match> findAll() {
         return matchRepository.findAll();
     }
@@ -53,7 +62,7 @@ public class MatchService {
                 .title(matchDto.text())
                 .description(matchDto.description())
                 .maxPlayers(matchDto.maxPlayers())
-                .createrUser(user)
+                .createrUserId(user)
                 .build();
         Match savedMatch = matchRepository.save(match);
 
@@ -67,7 +76,7 @@ public class MatchService {
         User user = userService.getUserById(matchDto.creatorUserId());
         Match searchedMatch = findById(id);
 
-        if(user.getId() != searchedMatch.getCreaterUser().getId()) {
+        if(user.getId() != searchedMatch.getCreaterUserId().getId()) {
             throw new EntityNotExistsException("Mis-matched user");
         }
 
@@ -77,7 +86,7 @@ public class MatchService {
                 .title(matchDto.text())
                 .maxPlayers(matchDto.maxPlayers())
                 .description(matchDto.description())
-                .createrUser(user)
+                .createrUserId(user)
                 .build();
         Match savedMatch = matchRepository.save(match);
 
@@ -91,7 +100,7 @@ public class MatchService {
         User user = userService.getUserById(matchDto.creatorUserId());
         Match match = findById(id);
 
-        if(user.getId() != match.getCreaterUser().getId()) {
+        if(user.getId() != match.getCreaterUserId().getId()) {
             throw new EntityNotExistsException("Mis-matched user");
         }
 
@@ -101,7 +110,7 @@ public class MatchService {
                 .title(match.getTitle())
                 .maxPlayers(match.getMaxPlayers())
                 .description(match.getDescription())
-                .createrUser(match.getCreaterUser())
+                .createrUserId(match.getCreaterUserId())
                 .matchStatus(MatchStatus.CANCELADA)
                 .build();
 
@@ -112,7 +121,7 @@ public class MatchService {
         User user = userService.getUserById(matchDto.creatorUserId());
         Match match = findById(id);
 
-        if(user.getId() != match.getCreaterUser().getId()) {
+        if(user.getId() != match.getCreaterUserId().getId()) {
             throw new EntityNotExistsException("Mis-matched user");
         }
 
