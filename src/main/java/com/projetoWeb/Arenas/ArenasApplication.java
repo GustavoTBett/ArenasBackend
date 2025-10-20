@@ -8,11 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ArenasApplication {
 
 	public static void main(String[] args) {
-        try {
-            throw new Exception("This is a test.");
-        } catch (Exception e) {
-            Sentry.captureException(e);
-        }
 		SpringApplication.run(ArenasApplication.class, args);
 	}
 

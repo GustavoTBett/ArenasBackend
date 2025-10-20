@@ -68,7 +68,7 @@ public class TokenService {
             }
             return jwtDecoder.decode(token);
         } catch (Exception e) {
-            throw new RuntimeException("Token inválido");
+            throw new RuntimeException("Token inválido", e);
         }
     }
 

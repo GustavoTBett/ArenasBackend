@@ -9,15 +9,17 @@ public class RolePlayerConverter implements AttributeConverter<RolePlayer, Strin
 
     @Override
     public String convertToDatabaseColumn(RolePlayer attribute) {
-        if (attribute == null) return null;
-        return attribute.getNome();
+        if (attribute == null)
+            return null;
+        return attribute.getValue();
     }
 
     @Override
     public RolePlayer convertToEntityAttribute(String dbData) {
-        if (dbData == null) return null;
+        if (dbData == null)
+            return null;
         for (RolePlayer e : RolePlayer.values()) {
-            if (e.getNome().equals(dbData)) {
+            if (e.getValue().equals(dbData)) {
                 return e;
             }
         }
