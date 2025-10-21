@@ -88,6 +88,7 @@ public class MatchService {
                 .maxPlayers(matchDto.maxPlayers())
                 .description(matchDto.description())
                 .createrUserId(user)
+                .matchStatus(searchedMatch.getMatchStatus())
                 .build();
         Match savedMatch = matchRepository.save(match);
 

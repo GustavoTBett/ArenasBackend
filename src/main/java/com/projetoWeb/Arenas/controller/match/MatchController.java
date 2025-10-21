@@ -2,6 +2,7 @@ package com.projetoWeb.Arenas.controller.match;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +28,7 @@ public class MatchController {
 
     private final MatchService matchService;
 
-    @GetMapping("/{id}")
+    @GetMapping("/{matchId}")
     public ResponseEntity<Match> getById(@PathVariable Long matchId) {
         return ResponseEntity.ok(matchService.findById(matchId));
     }
@@ -42,17 +43,17 @@ public class MatchController {
         return ResponseEntity.ok(matchService.create(matchDto));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{matchId}")
     public ResponseEntity<Match> updateMatch(@PathVariable Long matchId, @RequestBody MatchDto matchDto){
         return ResponseEntity.ok(matchService.update(matchId, matchDto));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{matchId}")
     public ResponseEntity<Match> cancelMatch(@PathVariable Long matchId, @RequestBody UserMatchDto matchDto){
         return ResponseEntity.ok(matchService.cancel(matchId, matchDto));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{matchId}")
     public ResponseEntity<String> deleteMatch(@PathVariable Long matchId, @RequestBody UserMatchDto matchDto){
         matchService.delete(matchId, matchDto);
 

@@ -64,6 +64,7 @@ public class LocalMatchService {
                 .description(localMatchDto.localName())
                 .zipCode(localMatchDto.localZipCode())
                 .street(localMatchDto.localStreet())
+                .number(localMatchDto.localNumber())
                 .complement(localMatchDto.localComplement())
                 .city(localMatchDto.localCity())
                 .state(localMatchDto.localState())
