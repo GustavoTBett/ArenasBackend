@@ -4,18 +4,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.projetoWeb.Arenas.controller.match.dto.CalendarioMatchDto;
+import com.projetoWeb.Arenas.repository.LocalMatchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.projetoWeb.Arenas.controller.match.dto.CalendarioMatchDto;
-import com.projetoWeb.Arenas.model.LocalMatch;
+import com.projetoWeb.Arenas.controller.match.dto.UserMatchDto;
+import com.projetoWeb.Arenas.controller.match.dto.MatchDto;
 import com.projetoWeb.Arenas.model.Match;
-import com.projetoWeb.Arenas.repository.LocalMatchRepository;
+import com.projetoWeb.Arenas.model.User;
+import com.projetoWeb.Arenas.model.LocalMatch;
 import com.projetoWeb.Arenas.model.enums.MatchStatus;
 import com.projetoWeb.Arenas.repository.MatchRepository;
 import com.projetoWeb.Arenas.repository.UserMatchRepository;
 import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
+import com.projetoWeb.Arenas.service.user.UserService;
 
 @Service
 public class MatchService {
@@ -24,10 +28,19 @@ public class MatchService {
     private MatchRepository matchRepository;
 
     @Autowired
-    private LocalMatchRepository localMatchRepository;
+    private UserService userService;
+
+    @Autowired
+    private MatchParameterService matchParameterService;
+
+    @Autowired
+    private LocalMatchService localMatchService;
 
     @Autowired
     private UserMatchRepository userMatchRepository;
+
+    @Autowired
+    private LocalMatchRepository localMatchRepository;
 
     public List<Match> findAll() {
         return matchRepository.findAll();
@@ -41,25 +54,82 @@ public class MatchService {
         throw new EntityNotExistsException("Match Not Found");
     }
 
-    // public Match saveMatchAndamento(CreateMatchDto matchDto){
-    // User user = userDetailsService.
-    // Match match = Match.builder()
-    // .matchDate(matchDto.matchData())
-    // .title(matchDto.text())
-    // .maxPlayers(matchDto.maxPlayers())
-    // .description(matchDto.description())
-    // .createrUserId(matchDto.creatorUserId())
-    //
-    // build();
-    // return matchRepository.save(match);
-    // }
+    public Match create(MatchDto matchDto){
+        User user = userService.getUserById(matchDto.creatorUserId());
 
-    public Match update(Match match) {
-        return matchRepository.save(match);
+        Match match = Match.builder()
+                .matchDate(matchDto.matchData())
+                .title(matchDto.text())
+                .description(matchDto.description())
+                .maxPlayers(matchDto.maxPlayers())
+                .createrUserId(user)
+                .matchStatus(MatchStatus.CONFIRMADA)
+                .build();
+        Match savedMatch = matchRepository.save(match);
+
+        matchParameterService.create(savedMatch, matchDto.matchParameterDto());
+        localMatchService.create(savedMatch, matchDto.localMatchDto());
+
+        return savedMatch;
     }
 
-    public void deleteById(long id) {
+    public Match update(Long id, MatchDto matchDto){
+        User user = userService.getUserById(matchDto.creatorUserId());
+        Match searchedMatch = findById(id);
+
+        if(user.getId() != searchedMatch.getCreaterUserId().getId()) {
+            throw new EntityNotExistsException("Mis-matched user");
+        }
+
+        Match match = Match.builder()
+                .id(id)
+                .matchDate(matchDto.matchData())
+                .title(matchDto.text())
+                .maxPlayers(matchDto.maxPlayers())
+                .description(matchDto.description())
+                .createrUserId(user)
+                .matchStatus(searchedMatch.getMatchStatus())
+                .build();
+        Match savedMatch = matchRepository.save(match);
+
+        matchParameterService.updateByMatchId(savedMatch, matchDto.matchParameterDto());
+        localMatchService.updateByMatchId(savedMatch, matchDto.localMatchDto());
+
+        return savedMatch;
+    }
+
+    public Match cancel(Long id, UserMatchDto matchDto){
+        User user = userService.getUserById(matchDto.creatorUserId());
+        Match match = findById(id);
+
+        if(user.getId() != match.getCreaterUserId().getId()) {
+            throw new EntityNotExistsException("Mis-matched user");
+        }
+
+        Match newMatch = Match.builder()
+                .id(match.getId())
+                .matchDate(match.getMatchDate())
+                .title(match.getTitle())
+                .maxPlayers(match.getMaxPlayers())
+                .description(match.getDescription())
+                .createrUserId(match.getCreaterUserId())
+                .matchStatus(MatchStatus.CANCELADA)
+                .build();
+
+        return matchRepository.save(newMatch);
+    }
+
+    public void delete(Long id, UserMatchDto matchDto){
+        User user = userService.getUserById(matchDto.creatorUserId());
+        Match match = findById(id);
+
+        if(user.getId() != match.getCreaterUserId().getId()) {
+            throw new EntityNotExistsException("Mis-matched user");
+        }
+
         matchRepository.deleteById(id);
+        matchParameterService.deleteByMatchId(id);
+        localMatchService.deleteByMatchId(id);
     }
 
     @Transactional(readOnly = true)

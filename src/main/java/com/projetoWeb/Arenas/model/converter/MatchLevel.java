@@ -15,4 +15,13 @@ public enum MatchLevel {
     MatchLevel(String value) {
         this.value = value;
     }
+
+    public static MatchLevel fromString(String text) {
+        for (MatchLevel level : MatchLevel.values()) {
+            if (level.value.equalsIgnoreCase(text)) {
+                return level;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with value: " + text);
+    }
 }
