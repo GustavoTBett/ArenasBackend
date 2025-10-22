@@ -61,4 +61,8 @@ public class UserMatchService {
     return Long.valueOf(userMatchRepository.findByMatchIdAndUserMatchStatus(matchId, status).size());
   }
 
+  public UserMatch findByUserIdAndMatchId(Long userId, Long matchId) {
+    return userMatchRepository.findByUserIdAndMatchId(userId, matchId);
+  }
+
 }

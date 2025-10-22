@@ -4,18 +4,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.projetoWeb.Arenas.controller.match.dto.CalendarioMatchDto;
-import com.projetoWeb.Arenas.repository.LocalMatchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.projetoWeb.Arenas.controller.match.dto.UserMatchDto;
+import com.projetoWeb.Arenas.controller.match.dto.CalendarioMatchDto;
 import com.projetoWeb.Arenas.controller.match.dto.MatchDto;
+import com.projetoWeb.Arenas.controller.match.dto.UserMatchDto;
+import com.projetoWeb.Arenas.model.LocalMatch;
 import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.model.User;
-import com.projetoWeb.Arenas.model.LocalMatch;
 import com.projetoWeb.Arenas.model.enums.MatchStatus;
+import com.projetoWeb.Arenas.model.enums.UserMatchStatus;
+import com.projetoWeb.Arenas.repository.LocalMatchRepository;
 import com.projetoWeb.Arenas.repository.MatchRepository;
 import com.projetoWeb.Arenas.repository.UserMatchRepository;
 import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
@@ -54,7 +55,7 @@ public class MatchService {
         throw new EntityNotExistsException("Match Not Found");
     }
 
-    public Match create(MatchDto matchDto){
+    public Match create(MatchDto matchDto) {
         User user = userService.getUserById(matchDto.creatorUserId());
 
         Match match = Match.builder()
@@ -73,11 +74,11 @@ public class MatchService {
         return savedMatch;
     }
 
-    public Match update(Long id, MatchDto matchDto){
+    public Match update(Long id, MatchDto matchDto) {
         User user = userService.getUserById(matchDto.creatorUserId());
         Match searchedMatch = findById(id);
 
-        if(user.getId() != searchedMatch.getCreaterUserId().getId()) {
+        if (user.getId() != searchedMatch.getCreaterUserId().getId()) {
             throw new EntityNotExistsException("Mis-matched user");
         }
 
@@ -98,11 +99,11 @@ public class MatchService {
         return savedMatch;
     }
 
-    public Match cancel(Long id, UserMatchDto matchDto){
+    public Match cancel(Long id, UserMatchDto matchDto) {
         User user = userService.getUserById(matchDto.creatorUserId());
         Match match = findById(id);
 
-        if(user.getId() != match.getCreaterUserId().getId()) {
+        if (user.getId() != match.getCreaterUserId().getId()) {
             throw new EntityNotExistsException("Mis-matched user");
         }
 
@@ -119,11 +120,11 @@ public class MatchService {
         return matchRepository.save(newMatch);
     }
 
-    public void delete(Long id, UserMatchDto matchDto){
+    public void delete(Long id, UserMatchDto matchDto) {
         User user = userService.getUserById(matchDto.creatorUserId());
         Match match = findById(id);
 
-        if(user.getId() != match.getCreaterUserId().getId()) {
+        if (user.getId() != match.getCreaterUserId().getId()) {
             throw new EntityNotExistsException("Mis-matched user");
         }
 
@@ -137,8 +138,8 @@ public class MatchService {
         List<Match> matches = matchRepository.findAll();
 
         return matches.stream()
-            .map(this::convertToCalendarioDto)
-            .collect(Collectors.toList());
+                .map(this::convertToCalendarioDto)
+                .collect(Collectors.toList());
     }
 
     private CalendarioMatchDto convertToCalendarioDto(Match match) {
@@ -150,13 +151,13 @@ public class MatchService {
         String participantesInfo = participantesAtuais + "/" + match.getMaxPlayers();
 
         return CalendarioMatchDto.builder()
-            .id(match.getId())
-            .titulo(match.getTitle())
-            .dataHora(match.getMatchDate())
-            .status(match.getMatchStatus())
-            .local(localInfo)
-            .participantes(participantesInfo)
-            .build();
+                .id(match.getId())
+                .titulo(match.getTitle())
+                .dataHora(match.getMatchDate())
+                .status(match.getMatchStatus())
+                .local(localInfo)
+                .participantes(participantesInfo)
+                .build();
     }
 
     private String getLocalInfo(Match match) {
@@ -169,9 +170,9 @@ public class MatchService {
                     return local.getDescription();
                 }
                 return String.format("%s, %s - %s",
-                    local.getStreet(),
-                    local.getNeighborhood(),
-                    local.getCity());
+                        local.getStreet(),
+                        local.getNeighborhood(),
+                        local.getCity());
             }
         } catch (Exception e) {
             return null;
@@ -185,5 +186,13 @@ public class MatchService {
 
     public List<Match> findByUserAndMatchStatus(Long userId, MatchStatus status) {
         return matchRepository.findByUserAndMatchStatus(userId, status);
+    }
+
+    public List<Match> findByUserAndUserMatchStatus(Long userId, MatchStatus status, UserMatchStatus userMatchStatus) {
+        return matchRepository.findByUserAndUserMatchStatus(userId, status, userMatchStatus);
+    }
+
+    public List<Match> findByUserMatchAndMatchStatus(Long userId, MatchStatus matchStatus) {
+        return matchRepository.findByUserMatchAndMatchStatus(userId, matchStatus);
     }
 }

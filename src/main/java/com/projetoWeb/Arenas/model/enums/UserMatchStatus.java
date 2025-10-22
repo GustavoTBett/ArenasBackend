@@ -2,7 +2,7 @@ package com.projetoWeb.Arenas.model.enums;
 
 public enum UserMatchStatus {
     CONFIRMADO("A", "Confirmado"),
-    SOLITADO("S", "Solicitado"),
+    PENDENTE("P", "Pendente"),
     CONVITE_ENVIADO("C", "Convite Enviado"),
     RECUSADO("R", "Recusado");
 

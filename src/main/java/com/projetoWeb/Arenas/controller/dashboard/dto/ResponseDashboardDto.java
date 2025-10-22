@@ -1,6 +1,6 @@
 package com.projetoWeb.Arenas.controller.dashboard.dto;
 
-import com.projetoWeb.Arenas.model.enums.MatchStatus;
+import com.projetoWeb.Arenas.model.LocalMatch;
 
 import lombok.Builder;
 
@@ -16,6 +16,8 @@ public class ResponseDashboardDto {
   private Long maxPlayers;
   private Long currentPlayers;
   private String status;
+  private String requestedUserName;
+  private LocalMatch localMatch;
 
   public Long getId() {
     return id;
@@ -87,6 +89,22 @@ public class ResponseDashboardDto {
 
   public void setCurrentPlayers(Long currentPlayers) {
     this.currentPlayers = currentPlayers;
+  }
+
+  public String getRequestedUserName() {
+    return requestedUserName;
+  }
+
+  public void setRequestedUserName(String requestedUserName) {
+    this.requestedUserName = requestedUserName;
+  }
+
+  public LocalMatch getLocalMatch() {
+    return localMatch;
+  }
+
+  public void setLocalMatch(LocalMatch localMatch) {
+    this.localMatch = localMatch;
   }
 
 }
