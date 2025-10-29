@@ -45,22 +45,22 @@ public class MatchController {
     }
 
     @PostMapping
-    public ResponseEntity<Match> createMatch(@RequestBody MatchDto matchDto){
+    public ResponseEntity<Match> createMatch(@Valid @RequestBody MatchDto matchDto){
         return ResponseEntity.ok(matchService.create(matchDto));
     }
 
     @PutMapping("/{matchId}")
-    public ResponseEntity<Match> updateMatch(@PathVariable Long matchId, @RequestBody MatchDto matchDto){
+    public ResponseEntity<Match> updateMatch(@PathVariable Long matchId, @Valid @RequestBody MatchDto matchDto){
         return ResponseEntity.ok(matchService.update(matchId, matchDto));
     }
 
     @PatchMapping("/{matchId}")
-    public ResponseEntity<Match> cancelMatch(@PathVariable Long matchId, @RequestBody UserMatchDto matchDto){
+    public ResponseEntity<Match> cancelMatch(@PathVariable Long matchId ,@Valid @RequestBody UserMatchDto matchDto){
         return ResponseEntity.ok(matchService.cancel(matchId, matchDto));
     }
 
     @DeleteMapping("/{matchId}")
-    public ResponseEntity<String> deleteMatch(@PathVariable Long matchId, @RequestBody UserMatchDto matchDto){
+    public ResponseEntity<String> deleteMatch(@PathVariable Long matchId, @Valid @RequestBody UserMatchDto matchDto){
         matchService.delete(matchId, matchDto);
 
         return ResponseEntity.ok().body("Deletado com sucesso");
