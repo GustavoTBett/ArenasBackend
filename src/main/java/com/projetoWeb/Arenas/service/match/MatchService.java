@@ -133,8 +133,8 @@ public class MatchService {
     }
 
     @Transactional(readOnly = true)
-    public List<CalendarioMatchDto> findAllForCalendario() {
-        List<Match> matches = matchRepository.findAll();
+    public List<CalendarioMatchDto> findAllForCalendario(Long userId) {
+        List<Match> matches = matchRepository.findAllByUserId(userId);
 
         return matches.stream()
             .map(this::convertToCalendarioDto)

@@ -29,9 +29,9 @@ public class MatchController {
 
     private final MatchService matchService;
 
-    @GetMapping("/calendario")
-    public ResponseEntity<List<CalendarioMatchDto>> getCalendarioMatches() {
-        return ResponseEntity.ok(matchService.findAllForCalendario());
+    @GetMapping("/calendario/{userId}")
+    public ResponseEntity<List<CalendarioMatchDto>> getCalendarioMatches(@PathVariable Long userId) {
+        return ResponseEntity.ok(matchService.findAllForCalendario(userId));
     }
 
     @GetMapping("/{matchId}")

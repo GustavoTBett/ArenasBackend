@@ -23,4 +23,12 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
   @Query(sqlFindByUserAndMatchStatus)
   List<Match> findByUserAndMatchStatus(@Param("userId") Long userId, @Param("status") MatchStatus status);
+
+  @Query(
+          "select m" +
+          " from Match m " +
+          " join UserMatch um on um.match = m " +
+          " where um.user.id = :userId"
+  )
+  List<Match> findAllByUserId(@Param("userId") Long userId);
 }
