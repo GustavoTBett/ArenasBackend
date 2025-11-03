@@ -7,7 +7,7 @@ import java.time.ZonedDateTime;
 
 public record MatchDto(
             @NotNull(message = "Data da partida é obrigatório") ZonedDateTime matchData,
-            @NotNull(message = "Titulo da partida é obrigatório") @NotBlank(message = "Titulo da partida é obrigatório") String text,
+            @NotBlank(message = "Titulo da partida é obrigatório") String text,
             @NotNull(message = "Numero de jogadores é obrigatório") Long maxPlayers,
             String description,
             @NotNull(message = "Criador é obrigatório") Long creatorUserId,
