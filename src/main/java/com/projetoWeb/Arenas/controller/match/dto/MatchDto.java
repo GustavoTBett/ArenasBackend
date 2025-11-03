@@ -1,15 +1,17 @@
 package com.projetoWeb.Arenas.controller.match.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.ZonedDateTime;
 
 public record MatchDto(
-            @NotBlank(message = "Data da partida é obrigatório") ZonedDateTime matchData,
+            @NotNull(message = "Data da partida é obrigatório") ZonedDateTime matchData,
             @NotBlank(message = "Titulo da partida é obrigatório") String text,
-            Long maxPlayers,
+            @NotNull(message = "Numero de jogadores é obrigatório") Long maxPlayers,
             String description,
-            Long creatorUserId,
-            MatchParameterDto matchParameterDto,
-            LocalMatchDto localMatchDto) {
+            @NotNull(message = "Criador é obrigatório") Long creatorUserId,
+            @Valid MatchParameterDto matchParameterDto,
+            @Valid LocalMatchDto localMatchDto) {
 }

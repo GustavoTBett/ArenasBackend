@@ -1,6 +1,7 @@
 package com.projetoWeb.Arenas.controller.match.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record LocalMatchDto(
                 @NotBlank(message = "Nome do local é obrigatório") String localName,

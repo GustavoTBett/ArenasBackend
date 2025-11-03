@@ -2,8 +2,8 @@ package com.projetoWeb.Arenas.model.converter;
 
 public enum MatchLevel {
     INICIANTE("Iniciante"),
-    INTERMEDIARIO("Intermediário"),
-    AVANCADO("Avançado"),
+    INTERMEDIARIO("Intermediario"),
+    AVANCADO("Avancado"),
     MISTO("Misto");
 
     private String value;

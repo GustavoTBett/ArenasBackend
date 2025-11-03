@@ -1,5 +1,7 @@
 package com.projetoWeb.Arenas.controller.match.dto;
 
 
-public record UserMatchDto(Long creatorUserId) {
+import jakarta.validation.constraints.NotNull;
+
+public record UserMatchDto(@NotNull(message = "Criador e obrigatorio") Long creatorUserId) {
 }

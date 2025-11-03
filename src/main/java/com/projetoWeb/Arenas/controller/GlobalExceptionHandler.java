@@ -3,6 +3,7 @@ package com.projetoWeb.Arenas.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -39,6 +40,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ProblemDetail> handleRefreshTokenExpiredExpection(RefreshTokenExpiredExpection e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
         problemDetail.setTitle("Refresh token expired");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ProblemDetail> handleValidationExceptions(MethodArgumentNotValidException e) {
+        StringBuilder errors = new StringBuilder();
+        //e.getBindingResult().getAllErrors().forEach(error -> {
+            //errors.append(error.getDefaultMessage()).append("; ");
+        //});
+        errors.append(e.getBindingResult().getAllErrors().getFirst().getDefaultMessage());
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errors.toString());
+        problemDetail.setTitle("Validation Failed");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
     }
 }
