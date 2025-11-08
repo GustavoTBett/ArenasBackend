@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.projetoWeb.Arenas.model.enums.RolePlayer;
 
+import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

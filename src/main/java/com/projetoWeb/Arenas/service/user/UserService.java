@@ -59,6 +59,18 @@ public class UserService {
     }
 
     @Transactional
+    public String getProfilePictureUrl(Long id) {
+        User user = getUserById(id);
+        byte[] profilePic = user.getProfilePic();
+        if (profilePic != null && profilePic.length > 0) {
+            String base64Image = Base64.getEncoder().encodeToString(profilePic);
+            return "data:image/png;base64," + base64Image;
+        } else {
+            return null;
+        }
+    }
+
+    @Transactional
     public User getUserById(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {

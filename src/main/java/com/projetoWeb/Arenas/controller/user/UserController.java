@@ -47,6 +47,12 @@ public class UserController {
     return ResponseEntity.ok(userService.getUserById(id));
   }
 
+  @GetMapping("getProfilePicture/{id}")
+  public ResponseEntity<String> getProfilePicture(@PathVariable("id") Long id) {
+    String profilePictureUrl = userService.getProfilePictureUrl(id);
+    return ResponseEntity.ok(profilePictureUrl);
+  }
+
   @PutMapping("/{id}")
   public ResponseEntity<Long> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserDto updateUserDto) {
     return ResponseEntity.ok(userService.updateUser(id, updateUserDto));
