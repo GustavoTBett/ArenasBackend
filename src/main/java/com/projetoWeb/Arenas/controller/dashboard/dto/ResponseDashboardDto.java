@@ -1,7 +1,5 @@
 package com.projetoWeb.Arenas.controller.dashboard.dto;
 
-import com.projetoWeb.Arenas.model.enums.MatchStatus;
-
 import lombok.Builder;
 
 @Builder

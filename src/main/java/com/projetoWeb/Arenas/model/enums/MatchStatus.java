@@ -20,4 +20,13 @@ public enum MatchStatus {
     public String getValue() {
         return value;
     }
+
+    public static MatchStatus fromString(String text) {
+        for (MatchStatus status : MatchStatus.values()) {
+            if (status.value.equalsIgnoreCase(text)) {
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with value: " + text);
+    }
 }

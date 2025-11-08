@@ -30,6 +30,10 @@ public class DashboardController {
 
     List<Match> matchs = matchService.findByUserAndMatchStatus(userId, MatchStatus.CONFIRMADA);
 
+    if (matchs.isEmpty()) {
+      return ResponseEntity.noContent().build();
+    }
+
     List<ResponseDashboardDto> dtos = matchs.stream().map(match -> {
 
       Long currentPlayers = userMatchService.countByMatchIdAndUserMatchStatus(match.getId(),

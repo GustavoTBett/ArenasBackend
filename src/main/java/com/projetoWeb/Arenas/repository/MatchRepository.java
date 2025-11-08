@@ -11,24 +11,25 @@ import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.model.enums.MatchStatus;
 
 @Repository
-public interface MatchRepository extends JpaRepository<Match, Long> {
-  List<Match> findByMatchStatus(MatchStatus status);
+public interface MatchRepository extends JpaRepository<Match, Long>, MatchRespositoryCustom {
+        List<Match> findByMatchStatus(MatchStatus status);
 
-  static String sqlFindByUserAndMatchStatus = "" +
-      " select m " +
-      "   from Match m " +
-      "   join UserMatch um on um.match = m " +
-      "  where um.user.id = :userId " +
-      "    and m.matchStatus = :status ";
+        static String sqlFindByUserAndMatchStatus = "" +
+                        " select m " +
+                        "   from Match m " +
+                        "   join UserMatch um on um.match = m " +
+                        "  where um.user.id = :userId " +
+                        "    and m.matchStatus = :status ";
 
-  @Query(sqlFindByUserAndMatchStatus)
-  List<Match> findByUserAndMatchStatus(@Param("userId") Long userId, @Param("status") MatchStatus status);
+        @Query(sqlFindByUserAndMatchStatus)
+        List<Match> findByUserAndMatchStatus(@Param("userId") Long userId, @Param("status") MatchStatus status);
 
-  @Query(
-          "select m" +
-          " from Match m " +
-          " join UserMatch um on um.match = m " +
-          " where um.user.id = :userId"
-  )
-  List<Match> findAllByUserId(@Param("userId") Long userId);
+        static String sqlFindAllByUserId = "" +
+                        " select m " +
+                        "   from Match m " +
+                        "   join UserMatch um on um.match = m " +
+                        "  where um.user.id = :userId ";
+
+        @Query(sqlFindAllByUserId)
+        List<Match> findAllByUserId(@Param("userId") Long userId);
 }
