@@ -41,10 +41,10 @@ public class MatchParameterService {
         throw new EntityNotExistsException("Match Parameter Not Found");
     }
 
-    public MatchParameter create(Match match, MatchParameterDto matchParameterDto){
+    public MatchParameter create(Match match, MatchParameterDto matchParameterDto) {
         MatchParameter matchParameter = MatchParameter.builder()
-                .user_value(matchParameterDto.user_value())
-                .matchLevel(MatchLevel.fromString(matchParameterDto.match_level()))
+                .userValue(matchParameterDto.userValue())
+                .matchLevel(MatchLevel.fromString(matchParameterDto.matchLevel()))
                 .privateMatch(matchParameterDto.privateMatch())
                 .notifyUser(matchParameterDto.notifyUser())
                 .match(match)
@@ -53,13 +53,13 @@ public class MatchParameterService {
         return matchParameterRepository.save(matchParameter);
     }
 
-    public MatchParameter updateByMatchId(Match match, MatchParameterDto matchParameterDto){
+    public MatchParameter updateByMatchId(Match match, MatchParameterDto matchParameterDto) {
         MatchParameter savedMatchParameter = findByMatchId(match.getId());
 
         MatchParameter matchParameter = MatchParameter.builder()
                 .id(savedMatchParameter.getId())
-                .user_value(matchParameterDto.user_value())
-                .matchLevel(MatchLevel.fromString(matchParameterDto.match_level()))
+                .userValue(matchParameterDto.userValue())
+                .matchLevel(MatchLevel.fromString(matchParameterDto.matchLevel()))
                 .privateMatch(matchParameterDto.privateMatch())
                 .notifyUser(matchParameterDto.notifyUser())
                 .match(match)
@@ -68,7 +68,7 @@ public class MatchParameterService {
         return matchParameterRepository.save(matchParameter);
     }
 
-    public void deleteByMatchId(Long matchId){
+    public void deleteByMatchId(Long matchId) {
         MatchParameter savedMatchParameter = findByMatchId(matchId);
 
         matchParameterRepository.deleteById(savedMatchParameter.getId());

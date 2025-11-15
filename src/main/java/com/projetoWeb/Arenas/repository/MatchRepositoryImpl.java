@@ -1,5 +1,10 @@
 package com.projetoWeb.Arenas.repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -32,6 +37,8 @@ public class MatchRepositoryImpl implements MatchRespositoryCustom {
       String city,
       String zipCode,
       String matchLevel,
+      String date,
+      String time,
       Long userValue) {
 
     QMatch match = QMatch.match;
@@ -58,12 +65,24 @@ public class MatchRepositoryImpl implements MatchRespositoryCustom {
     if (matchLevel != null && !matchLevel.isEmpty()) {
       builder.and(matchParameter.matchLevel.eq(MatchLevel.fromString(matchLevel)));
     }
+    if (date != null && !date.isEmpty()) {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+      LocalDate parsedDate = LocalDate.parse(date, formatter);
+      builder.and(match.matchDate.between(parsedDate.atStartOfDay(ZoneId.systemDefault()),
+          parsedDate.plusDays(1).atStartOfDay(ZoneId.systemDefault())));
+    }
+    if (time != null && !time.isEmpty()) {
+      int hour = Integer.parseInt(time.split(":")[0]);
+      builder.and(match.matchDate.hour().eq(hour));
+    }
     if (userValue != null) {
-      builder.and(matchParameter.user_value.loe(userValue));
+      builder.and(matchParameter.userValue.loe(userValue));
     }
 
     return queryFactory
         .selectFrom(match)
+        .leftJoin(localMatch).on(localMatch.match.id.eq(match.id))
+        .leftJoin(matchParameter).on(matchParameter.match.id.eq(match.id))
         .where(builder)
         .fetch();
   }

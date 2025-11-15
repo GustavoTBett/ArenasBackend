@@ -17,8 +17,8 @@ public interface MatchRepository extends JpaRepository<Match, Long>, MatchRespos
         static String sqlFindByUserAndMatchStatus = "" +
                         " select m " +
                         "   from Match m " +
-                        "   join UserMatch um on um.match = m " +
-                        "  where um.user.id = :userId " +
+                        "   left join UserMatch um on um.match = m " +
+                        "  where (um.user.id = :userId or m.createrUserId.id = :userId) " +
                         "    and m.matchStatus = :status ";
 
         @Query(sqlFindByUserAndMatchStatus)

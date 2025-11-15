@@ -15,10 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.projetoWeb.Arenas.controller.match.dto.CalendarioMatchDto;
 import com.projetoWeb.Arenas.controller.match.dto.MatchDto;
+import com.projetoWeb.Arenas.controller.match.dto.ResponseSearchMatchDto;
 import com.projetoWeb.Arenas.controller.match.dto.SearchMatchDto;
 import com.projetoWeb.Arenas.controller.match.dto.UserMatchDto;
 import com.projetoWeb.Arenas.model.Match;
+import com.projetoWeb.Arenas.model.enums.UserMatchStatus;
 import com.projetoWeb.Arenas.service.match.MatchService;
+import com.projetoWeb.Arenas.service.match.UserMatchService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class MatchController {
 
     private final MatchService matchService;
+    private final UserMatchService userMatchService;
 
     @GetMapping("/calendario/{userId}")
     public ResponseEntity<List<CalendarioMatchDto>> getCalendarioMatches(@PathVariable Long userId) {
@@ -68,14 +72,36 @@ public class MatchController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<List<Match>> searchMatch(@RequestBody SearchMatchDto searchMatchDto) {
+    public ResponseEntity<List<ResponseSearchMatchDto>> searchMatch(@RequestBody SearchMatchDto searchMatchDto) {
         List<Match> matches = matchService.searchMatches(searchMatchDto);
 
         if (matches.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
-        return ResponseEntity.ok().body(matches);
+        List<ResponseSearchMatchDto> dtos = matches.stream().map(match -> {
+
+            Long currentPlayers = userMatchService.countByMatchIdAndUserMatchStatus(match.getId(),
+                    UserMatchStatus.CONFIRMADO);
+
+            String createdUserName = match.getCreaterUserId().getFirstName() + " "
+                    + match.getCreaterUserId().getLastName();
+
+            return ResponseSearchMatchDto.builder()
+                    .id(match.getId())
+                    .createUserId(match.getCreaterUserId().getId())
+                    .createUserName(createdUserName)
+                    .title(match.getTitle())
+                    .time(match.getMatchDate().toLocalTime().toString())
+                    .date(match.getMatchDate().toLocalDate().toString())
+                    .maxPlayers(match.getMaxPlayers())
+                    .currentPlayers(currentPlayers)
+                    .status(match.getMatchStatus().getValue())
+                    .build();
+
+        }).toList();
+
+        return ResponseEntity.ok().body(dtos);
     }
 
 }

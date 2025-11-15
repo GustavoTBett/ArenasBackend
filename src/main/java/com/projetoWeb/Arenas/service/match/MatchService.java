@@ -196,6 +196,8 @@ public class MatchService {
                 searchMatchDto.city(),
                 searchMatchDto.zipCode(),
                 searchMatchDto.matchLevel(),
+                searchMatchDto.date(),
+                searchMatchDto.time(),
                 searchMatchDto.userValue());
     }
 }

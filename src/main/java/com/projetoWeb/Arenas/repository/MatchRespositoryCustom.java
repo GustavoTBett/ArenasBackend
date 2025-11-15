@@ -12,5 +12,7 @@ public interface MatchRespositoryCustom {
       String city,
       String zipCode,
       String matchLevel,
+      String date,
+      String time,
       Long userValue);
 }
