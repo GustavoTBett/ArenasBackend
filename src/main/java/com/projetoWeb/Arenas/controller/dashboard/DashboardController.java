@@ -2,6 +2,7 @@ package com.projetoWeb.Arenas.controller.dashboard;
 
 import java.util.List;
 
+import com.projetoWeb.Arenas.service.userMatch.UserMatchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,7 +14,6 @@ import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.model.enums.MatchStatus;
 import com.projetoWeb.Arenas.model.enums.UserMatchStatus;
 import com.projetoWeb.Arenas.service.match.MatchService;
-import com.projetoWeb.Arenas.service.match.UserMatchService;
 
 import lombok.RequiredArgsConstructor;
 
