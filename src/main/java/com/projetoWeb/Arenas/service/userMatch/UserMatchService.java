@@ -1,12 +1,15 @@
 package com.projetoWeb.Arenas.service.userMatch;
 
-import com.projetoWeb.Arenas.controller.userMatch.UserMatchController;
-import com.projetoWeb.Arenas.controller.userMatch.dto.UserMatchDto;
+import com.projetoWeb.Arenas.controller.userMatch.dto.CreateUserMatchDto;
+import com.projetoWeb.Arenas.controller.userMatch.dto.SearchUserMatchDto;
+import com.projetoWeb.Arenas.model.Match;
+import com.projetoWeb.Arenas.model.User;
+import com.projetoWeb.Arenas.model.enums.RolePlayer;
+import com.projetoWeb.Arenas.model.enums.UserMatchStatus;
 import com.projetoWeb.Arenas.repository.UserMatchRepository;
 import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
 import com.projetoWeb.Arenas.service.match.MatchService;
 import com.projetoWeb.Arenas.service.user.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.projetoWeb.Arenas.model.UserMatch;
@@ -38,11 +41,31 @@ public class UserMatchService {
         return userMatchRepository.findByMatchId(id);
     }
 
-    public List<UserMatch> findByUserAndMatch(UserMatchDto userMatchDto) {
+    public List<UserMatch> findByUserAndMatch(SearchUserMatchDto userMatchDto) {
         return userMatchRepository.findByMatchIdAndUserId(userMatchDto.matchId(), userMatchDto.userId());
     }
 
-    public UserMatch create(UserMatchDto userMatchDto) {
-
+    public Long countByMatchId(Long matchId) {
+        return Long.valueOf(userMatchRepository.findByMatchId(matchId).size());
     }
+
+    public UserMatch create(CreateUserMatchDto userMatchDto) {
+        User user = userService.getUserById(userMatchDto.userId());
+        Match match = matchService.findById(userMatchDto.matchId());
+
+        List<UserMatch> searchedMatches = findByUserAndMatch(new SearchUserMatchDto(userMatchDto.userId(), userMatchDto.matchId()));
+        if(searchedMatches.stream().anyMatch(userMatch -> userMatch.getMatchUserStatus != UserMatchStatus.CONFIRMADO)) {
+           throw  new EntityNotExistsException("Pedido de participacao ja existe");
+        }
+
+        UserMatch newUserMatch = UserMatch.builde()
+                .match(match)
+                .user(user)
+                .rolePlayer(RolePlayer.valueOf(userMatchDto.rolePlayer()))
+                .build();
+
+        return userMatchRepository.save(newUserMatch);
+    }
+
+    public UserMatch
 }
