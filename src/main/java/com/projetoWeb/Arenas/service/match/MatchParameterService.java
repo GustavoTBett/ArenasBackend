@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.projetoWeb.Arenas.controller.match.dto.MatchParameterDto;
 import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.model.MatchParameter;
-import com.projetoWeb.Arenas.model.converter.MatchLevel;
+import com.projetoWeb.Arenas.model.enums.MatchLevel;
 import com.projetoWeb.Arenas.repository.MatchParameterRepository;
 import com.projetoWeb.Arenas.service.exception.EntityNotExistsException;
 

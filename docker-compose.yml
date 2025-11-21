@@ -1,43 +1,4 @@
 services:
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    hostname: api
-    networks:
-      - api-network
-    restart: always
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
-    environment:
-      - SPRING_JPA_SHOW_SQL=false
-      - SPRING_DATASOURCE_URL=x
-      - SPRING_DATASOURCE_USERNAME=x
-      - SPRING_DATASOURCE_PASSWORD=x
-      - FRONT_URL=x
-      - GOOGLE_CLIENT_ID=x
-      - GOOGLE_CLIENT_SECRET=x
-    mem_limit: 1024m
-    cpus: 2.0
-
-  nginx:
-    image: nginx:1.28.0-alpine
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    ports:
-      - "9090:9090"
-    networks:
-      - api-network
-    depends_on:
-      api:
-        condition: service_healthy
-    mem_limit: 128m
-    cpus: 0.2
-
   postgres:
     image: postgres:alpine
     hostname: postgres
@@ -45,12 +6,11 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - internal
       - api-network
     environment:
-      POSTGRES_DB: x
-      POSTGRES_USER: x
-      POSTGRES_PASSWORD: x
+      POSTGRES_DB: arenas
+      POSTGRES_USER: arenas
+      POSTGRES_PASSWORD: arenas_pass
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
