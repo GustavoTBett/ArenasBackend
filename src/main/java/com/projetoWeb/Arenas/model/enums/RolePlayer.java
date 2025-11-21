@@ -1,5 +1,7 @@
 package com.projetoWeb.Arenas.model.enums;
 
+import com.projetoWeb.Arenas.model.converter.MatchLevel;
+
 public enum RolePlayer {
     GOLEIRO("GOL", "Goleiro", "Responsável por defender o gol."),
     ZAGUEIRO("ZAG", "Zagueiro", "Atua na área central da defesa."),
@@ -33,4 +35,12 @@ public enum RolePlayer {
         return value;
     }
 
+    public static RolePlayer fromString(String text) {
+        for (RolePlayer player: RolePlayer.values()) {
+            if (player.value.equalsIgnoreCase(text)) {
+                return player;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with value: " + text);
+    }
 }

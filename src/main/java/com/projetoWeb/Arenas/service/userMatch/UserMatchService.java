@@ -30,7 +30,7 @@ public class UserMatchService {
     @Autowired
     private MatchService matchService;
 
-    private UserMatch findById(long id) {
+    public UserMatch findById(long id) {
         Optional<UserMatch> userMatch = userMatchRepository.findById(id);
         if (userMatch.isPresent()) {
            return userMatch.get();
@@ -60,28 +60,44 @@ public class UserMatchService {
 
         List<UserMatch> searchedMatches = findByUserAndMatch(new SearchUserMatchDto(userMatchDto.userId(), userMatchDto.matchId()));
         if(searchedMatches.stream().anyMatch(currentUserMatch -> currentUserMatch.getUserMatchStatus() != UserMatchStatus.CONFIRMADO)) {
-           throw  new EntityNotExistsException("Pedido de participacao ja existe");
+           throw new EntityNotExistsException("Pedido de participacao ja existe");
         }
 
         UserMatch newUserMatch = UserMatch.builder()
                 .match(match)
                 .user(user)
-                .rolePlayer(RolePlayer.valueOf(userMatchDto.rolePlayer()))
+                .rolePlayer(RolePlayer.fromString(userMatchDto.rolePlayer()))
                 .build();
+
+        if(userMatchDto.userMatchStatus() != null) {
+            if(!userMatchDto.userMatchStatus().isBlank()) {
+                newUserMatch.setUserMatchStatus(UserMatchStatus.valueOf(userMatchDto.userMatchStatus()));
+            }
+        }
 
         return userMatchRepository.save(newUserMatch);
     }
 
     public UserMatch update(Long userMatchId, PatchUserMatchDto userMatchDto) {
+        if((userMatchDto.userMatchStatus().isBlank())&&(userMatchDto.rolePlayer().isBlank())) {
+            throw new EntityNotExistsException("Posicao do jogador ou status da partida devem ser preenchidos");
+        }
+
         UserMatch searchedUsermatch = findById(userMatchId);
 
         UserMatch newUserMatch = UserMatch.builder()
                 .id(searchedUsermatch.getId())
                 .match(searchedUsermatch.getMatch())
                 .user(searchedUsermatch.getUser())
-                .rolePlayer(searchedUsermatch.getRolePlayer())
-                .userMatchStatus(UserMatchStatus.valueOf(userMatchDto.userMatchStatus()))
                 .build();
+
+        if(!userMatchDto.userMatchStatus().isBlank()) {
+            newUserMatch.setUserMatchStatus(UserMatchStatus.valueOf(userMatchDto.userMatchStatus()));
+        }
+
+        if(!userMatchDto.rolePlayer().isBlank()) {
+            newUserMatch.setRolePlayer(RolePlayer.valueOf(userMatchDto.rolePlayer()));
+        }
 
         return  userMatchRepository.save(newUserMatch);
     }
