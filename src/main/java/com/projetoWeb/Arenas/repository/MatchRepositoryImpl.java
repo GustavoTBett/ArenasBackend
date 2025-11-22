@@ -1,9 +1,7 @@
 package com.projetoWeb.Arenas.repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -13,7 +11,7 @@ import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.model.QLocalMatch;
 import com.projetoWeb.Arenas.model.QMatch;
 import com.projetoWeb.Arenas.model.QMatchParameter;
-import com.projetoWeb.Arenas.model.converter.MatchLevel;
+import com.projetoWeb.Arenas.model.enums.MatchLevel;
 import com.projetoWeb.Arenas.model.enums.MatchStatus;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
