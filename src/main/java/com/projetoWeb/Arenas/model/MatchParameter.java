@@ -1,6 +1,6 @@
 package com.projetoWeb.Arenas.model;
 
-import com.projetoWeb.Arenas.model.converter.MatchLevel;
+import com.projetoWeb.Arenas.model.enums.MatchLevel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

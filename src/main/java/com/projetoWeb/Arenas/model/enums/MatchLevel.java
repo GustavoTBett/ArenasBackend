@@ -1,4 +1,4 @@
-package com.projetoWeb.Arenas.model.converter;
+package com.projetoWeb.Arenas.model.enums;
 
 public enum MatchLevel {
     INICIANTE("I"),
