@@ -1,9 +1,9 @@
-package com.projetoWeb.Arenas.controller.dashboard.dto;
+package com.projetoWeb.Arenas.controller.match.dto;
 
 import lombok.Builder;
 
 @Builder
-public class ResponseDashboardDto {
+public class ResponseSearchMatchDto {
 
   private Long id;
   private Long createUserId;

@@ -2,12 +2,10 @@ package com.projetoWeb.Arenas.security;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import jakarta.servlet.http.Cookie;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,8 +17,10 @@ import com.projetoWeb.Arenas.service.auth.TokenService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -28,10 +28,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
 
+    Logger LOGGER = Logger.getLogger(JwtFilter.class.getName());
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
         try {
             String token = extractTokenFromRequest(request);
 
@@ -50,7 +52,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Erro ao validar token: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Erro ao validar token: ", e);
         }
 
         filterChain.doFilter(request, response);

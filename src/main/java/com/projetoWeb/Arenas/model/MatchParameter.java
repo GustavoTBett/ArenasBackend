@@ -20,7 +20,7 @@ public class MatchParameter {
     private Long id;
 
     @Column
-    private Long user_value;
+    private Long userValue;
 
     @Column(nullable = false)
     private MatchLevel matchLevel;
