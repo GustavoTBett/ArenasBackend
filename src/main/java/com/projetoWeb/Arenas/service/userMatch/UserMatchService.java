@@ -14,6 +14,7 @@ import com.projetoWeb.Arenas.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.projetoWeb.Arenas.model.UserMatch;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -67,19 +68,18 @@ public class UserMatchService {
                 .match(match)
                 .user(user)
                 .rolePlayer(RolePlayer.fromString(userMatchDto.rolePlayer()))
+                .userMatchStatus(UserMatchStatus.CONFIRMADO)
                 .build();
 
-        if(userMatchDto.userMatchStatus() != null) {
-            if(!userMatchDto.userMatchStatus().isBlank()) {
-                newUserMatch.setUserMatchStatus(UserMatchStatus.valueOf(userMatchDto.userMatchStatus()));
-            }
+        if(StringUtils.hasText(userMatchDto.userMatchStatus())) {
+            newUserMatch.setUserMatchStatus(UserMatchStatus.fromString(userMatchDto.userMatchStatus()));
         }
 
         return userMatchRepository.save(newUserMatch);
     }
 
     public UserMatch update(Long userMatchId, PatchUserMatchDto userMatchDto) {
-        if((userMatchDto.userMatchStatus().isBlank())&&(userMatchDto.rolePlayer().isBlank())) {
+        if((!StringUtils.hasText(userMatchDto.userMatchStatus())) && (!StringUtils.hasText(userMatchDto.rolePlayer()))) {
             throw new EntityNotExistsException("Posicao do jogador ou status da partida devem ser preenchidos");
         }
 
@@ -89,14 +89,16 @@ public class UserMatchService {
                 .id(searchedUsermatch.getId())
                 .match(searchedUsermatch.getMatch())
                 .user(searchedUsermatch.getUser())
+                .userMatchStatus(searchedUsermatch.getUserMatchStatus())
+                .rolePlayer(searchedUsermatch.getRolePlayer())
                 .build();
 
-        if(!userMatchDto.userMatchStatus().isBlank()) {
-            newUserMatch.setUserMatchStatus(UserMatchStatus.valueOf(userMatchDto.userMatchStatus()));
+        if (StringUtils.hasText(userMatchDto.userMatchStatus())) {
+            newUserMatch.setUserMatchStatus(UserMatchStatus.fromString(userMatchDto.userMatchStatus()));
         }
 
-        if(!userMatchDto.rolePlayer().isBlank()) {
-            newUserMatch.setRolePlayer(RolePlayer.valueOf(userMatchDto.rolePlayer()));
+        if(StringUtils.hasText(userMatchDto.rolePlayer())) {
+            newUserMatch.setRolePlayer(RolePlayer.fromString(userMatchDto.rolePlayer()));
         }
 
         return  userMatchRepository.save(newUserMatch);

@@ -1,7 +1,5 @@
 package com.projetoWeb.Arenas.model.enums;
 
-import com.projetoWeb.Arenas.model.converter.MatchLevel;
-
 public enum RolePlayer {
     GOLEIRO("GOL", "Goleiro", "Responsável por defender o gol."),
     ZAGUEIRO("ZAG", "Zagueiro", "Atua na área central da defesa."),
