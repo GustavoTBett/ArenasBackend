@@ -2,6 +2,7 @@ package com.projetoWeb.Arenas.controller.match;
 
 import java.util.List;
 
+import com.projetoWeb.Arenas.service.userMatch.UserMatchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,14 +15,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.projetoWeb.Arenas.controller.match.dto.CalendarioMatchDto;
+import com.projetoWeb.Arenas.controller.match.dto.LeaveMatchRequest;
 import com.projetoWeb.Arenas.controller.match.dto.MatchDto;
+import com.projetoWeb.Arenas.controller.match.dto.ResponderSolicitacaoRequest;
 import com.projetoWeb.Arenas.controller.match.dto.ResponseSearchMatchDto;
 import com.projetoWeb.Arenas.controller.match.dto.SearchMatchDto;
+import com.projetoWeb.Arenas.controller.match.dto.SolicitacaoMatchDto;
 import com.projetoWeb.Arenas.controller.match.dto.UserMatchDto;
+import com.projetoWeb.Arenas.model.LocalMatch;
 import com.projetoWeb.Arenas.model.Match;
+import com.projetoWeb.Arenas.model.User;
+import com.projetoWeb.Arenas.model.UserMatch;
 import com.projetoWeb.Arenas.model.enums.UserMatchStatus;
+import com.projetoWeb.Arenas.service.match.LocalMatchService;
 import com.projetoWeb.Arenas.service.match.MatchService;
-import com.projetoWeb.Arenas.service.match.UserMatchService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +40,7 @@ public class MatchController {
 
     private final MatchService matchService;
     private final UserMatchService userMatchService;
+    private final LocalMatchService localMatchService;
 
     @GetMapping("/calendario/{userId}")
     public ResponseEntity<List<CalendarioMatchDto>> getCalendarioMatches(@PathVariable Long userId) {
@@ -87,6 +95,30 @@ public class MatchController {
             String createdUserName = match.getCreaterUserId().getFirstName() + " "
                     + match.getCreaterUserId().getLastName();
 
+            String localName = null;
+            String localZipCode = null;
+            String localStreet = null;
+            String localNumber = null;
+            String localComplement = null;
+            String localCity = null;
+            String localState = null;
+            String localNeighborhood = null;
+
+            try {
+                LocalMatch localMatch = localMatchService.findByMatchId(match.getId());
+                if (localMatch != null) {
+                    localName = localMatch.getDescription();
+                    localZipCode = localMatch.getZipCode();
+                    localStreet = localMatch.getStreet();
+                    localNumber = localMatch.getNumber();
+                    localComplement = localMatch.getComplement();
+                    localCity = localMatch.getCity();
+                    localState = localMatch.getState();
+                    localNeighborhood = localMatch.getNeighborhood();
+                }
+            } catch (Exception e) {
+            }
+
             return ResponseSearchMatchDto.builder()
                     .id(match.getId())
                     .createUserId(match.getCreaterUserId().getId())
@@ -97,11 +129,77 @@ public class MatchController {
                     .maxPlayers(match.getMaxPlayers())
                     .currentPlayers(currentPlayers)
                     .status(match.getMatchStatus().getValue())
+                    .localName(localName)
+                    .localZipCode(localZipCode)
+                    .localStreet(localStreet)
+                    .localNumber(localNumber)
+                    .localComplement(localComplement)
+                    .localCity(localCity)
+                    .localState(localState)
+                    .localNeighborhood(localNeighborhood)
                     .build();
 
         }).toList();
 
         return ResponseEntity.ok().body(dtos);
+    }
+
+    @DeleteMapping("/leave")
+    public ResponseEntity<String> leaveMatch(@Valid @RequestBody LeaveMatchRequest request) {
+        userMatchService.leaveMatch(request.getMatchId(), request.getUserId());
+        return ResponseEntity.ok().body("Você saiu da partida com sucesso");
+    }
+
+    @GetMapping("/solicitacoes/{creatorUserId}")
+    public ResponseEntity<List<SolicitacaoMatchDto>> getSolicitacoes(
+            @PathVariable Long creatorUserId) {
+        
+        List<UserMatch> solicitacoes = userMatchService.findSolicitacoesByCreator(creatorUserId);
+        
+        if (solicitacoes.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        
+        List<SolicitacaoMatchDto> dtos = solicitacoes.stream().map(userMatch -> {
+            User user = userMatch.getUser();
+            
+            String profilePicBase64 = null;
+            if (user.getProfilePic() != null && user.getProfilePic().length > 0) {
+                profilePicBase64 = java.util.Base64.getEncoder().encodeToString(user.getProfilePic());
+            }
+            
+            return SolicitacaoMatchDto.builder()
+                    .userMatchId(userMatch.getId())
+                    .matchId(userMatch.getMatch().getId())
+                    .matchTitle(userMatch.getMatch().getTitle())
+                    .matchDate(userMatch.getMatch().getMatchDate())
+                    .userId(user.getId())
+                    .userFirstName(user.getFirstName())
+                    .userLastName(user.getLastName())
+                    .userEmail(user.getEmail())
+                    .userProfilePic(profilePicBase64)
+                    .rolePlayer(userMatch.getRolePlayer())
+                    .build();
+        }).toList();
+        
+        return ResponseEntity.ok(dtos);
+    }
+
+    @PatchMapping("/solicitacoes/responder")
+    public ResponseEntity<String> responderSolicitacao(
+            @Valid @RequestBody ResponderSolicitacaoRequest request) {
+        
+        userMatchService.responderSolicitacao(
+            request.getUserMatchId(), 
+            request.getAceitar(), 
+            request.getCreatorUserId()
+        );
+        
+        String mensagem = request.getAceitar() 
+            ? "Solicitação aceita com sucesso" 
+            : "Solicitação recusada";
+            
+        return ResponseEntity.ok(mensagem);
     }
 
 }

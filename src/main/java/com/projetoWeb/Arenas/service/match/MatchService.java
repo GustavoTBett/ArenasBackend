@@ -143,10 +143,8 @@ public class MatchService {
     }
 
     private CalendarioMatchDto convertToCalendarioDto(Match match) {
-        // Busca informações de local
         String localInfo = getLocalInfo(match);
 
-        // Calcula participantes (atual/máximo)
         long participantesAtuais = userMatchRepository.countByMatch(match);
         String participantesInfo = participantesAtuais + "/" + match.getMaxPlayers();
 
@@ -154,7 +152,7 @@ public class MatchService {
                 .id(match.getId())
                 .titulo(match.getTitle())
                 .dataHora(match.getMatchDate())
-                .status(match.getMatchStatus())
+                .status(match.getMatchStatus().getValue())
                 .local(localInfo)
                 .participantes(participantesInfo)
                 .build();
@@ -166,18 +164,50 @@ public class MatchService {
 
             if (localMatch.isPresent()) {
                 LocalMatch local = localMatch.get();
-                if (local.getDescription() != null && !local.getDescription().isEmpty()) {
-                    return local.getDescription();
+
+                if (hasValidAddress(local)) {
+                    return formatAddress(local);
                 }
-                return String.format("%s, %s - %s",
-                        local.getStreet(),
-                        local.getNeighborhood(),
-                        local.getCity());
             }
         } catch (Exception e) {
             return null;
         }
         return null;
+    }
+
+    private boolean hasValidAddress(LocalMatch local) {
+        return local.getStreet() != null && !local.getStreet().isEmpty() &&
+               local.getCity() != null && !local.getCity().isEmpty();
+    }
+
+    private String formatAddress(LocalMatch local) {
+        StringBuilder address = new StringBuilder();
+
+        if (local.getStreet() != null && !local.getStreet().isEmpty()) {
+            address.append(local.getStreet());
+        }
+
+        if (local.getNumber() != null && !local.getNumber().isEmpty()) {
+            address.append(", ").append(local.getNumber());
+        }
+
+        if (local.getNeighborhood() != null && !local.getNeighborhood().isEmpty()) {
+            address.append(" - ").append(local.getNeighborhood());
+        }
+
+        if (local.getCity() != null && !local.getCity().isEmpty()) {
+            address.append(", ").append(local.getCity());
+        }
+
+        if (local.getState() != null && !local.getState().isEmpty()) {
+            address.append(" - ").append(local.getState());
+        }
+
+        if (local.getZipCode() != null && !local.getZipCode().isEmpty()) {
+            address.append(" (").append(local.getZipCode()).append(")");
+        }
+        
+        return address.toString();
     }
 
     public List<Match> findByStatus(MatchStatus status) {

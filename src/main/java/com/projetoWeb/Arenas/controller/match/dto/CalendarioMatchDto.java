@@ -22,7 +22,7 @@ public class CalendarioMatchDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private ZonedDateTime dataHora;
 
-    private MatchStatus status;
+    private String status;
 
     private String local;
 

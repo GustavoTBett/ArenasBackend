@@ -47,6 +47,53 @@ public class UserMatchService {
         return userMatchRepository.findByMatchIdAndUserId(userMatchDto.matchId(), userMatchDto.userId());
     }
 
+    public void leaveMatch(Long matchId, Long userId) {
+        List<UserMatch> userMatches = userMatchRepository.findByMatchId(matchId);
+
+        UserMatch userMatch = userMatches.stream()
+                .filter(um -> um.getUser().getId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotExistsException("Você não está participando desta partida"));
+
+        userMatchRepository.delete(userMatch);
+    }
+
+    public List<UserMatch> findSolicitacoesByCreator(Long creatorUserId) {
+        return userMatchRepository.findAll().stream()
+                .filter(um -> um.getMatch().getCreaterUserId().getId().equals(creatorUserId)
+                        && um.getUserMatchStatus() == UserMatchStatus.SOLICITADO)
+                .toList();
+    }
+
+    public void responderSolicitacao(Long userMatchId, Boolean aceitar, Long creatorUserId) {
+        UserMatch userMatch = findById(userMatchId);
+
+        if (!userMatch.getMatch().getCreaterUserId().getId().equals(creatorUserId)) {
+            throw new EntityNotExistsException("Você não tem permissão para responder esta solicitação");
+        }
+
+        if (userMatch.getUserMatchStatus() != UserMatchStatus.SOLICITADO) {
+            throw new EntityNotExistsException("Esta solicitação não está mais pendente");
+        }
+
+        if (aceitar) {
+            long participantes = userMatchRepository.findByMatchIdAndUserMatchStatus(
+                    userMatch.getMatch().getId(),
+                    UserMatchStatus.CONFIRMADO
+            ).size();
+
+            if (participantes >= userMatch.getMatch().getMaxPlayers() - 1) {
+                throw new EntityNotExistsException("Não há mais vagas disponíveis");
+            }
+
+            userMatch.setUserMatchStatus(UserMatchStatus.CONFIRMADO);
+            userMatchRepository.save(userMatch);
+        } else {
+            userMatch.setUserMatchStatus(UserMatchStatus.RECUSADO);
+            userMatchRepository.save(userMatch);
+        }
+    }
+
     public Long countByMatchId(Long matchId) {
         return Long.valueOf(userMatchRepository.findByMatchId(matchId).size());
     }

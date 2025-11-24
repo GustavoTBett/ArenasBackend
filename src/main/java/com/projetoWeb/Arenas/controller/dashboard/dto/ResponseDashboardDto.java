@@ -14,6 +14,14 @@ public class ResponseDashboardDto {
   private Long maxPlayers;
   private Long currentPlayers;
   private String status;
+  private String localName;
+  private String localZipCode;
+  private String localStreet;
+  private String localNumber;
+  private String localComplement;
+  private String localCity;
+  private String localState;
+  private String localNeighborhood;
 
   public Long getId() {
     return id;
@@ -85,6 +93,70 @@ public class ResponseDashboardDto {
 
   public void setCurrentPlayers(Long currentPlayers) {
     this.currentPlayers = currentPlayers;
+  }
+
+  public String getLocalName() {
+    return localName;
+  }
+
+  public void setLocalName(String localName) {
+    this.localName = localName;
+  }
+
+  public String getLocalZipCode() {
+    return localZipCode;
+  }
+
+  public void setLocalZipCode(String localZipCode) {
+    this.localZipCode = localZipCode;
+  }
+
+  public String getLocalStreet() {
+    return localStreet;
+  }
+
+  public void setLocalStreet(String localStreet) {
+    this.localStreet = localStreet;
+  }
+
+  public String getLocalNumber() {
+    return localNumber;
+  }
+
+  public void setLocalNumber(String localNumber) {
+    this.localNumber = localNumber;
+  }
+
+  public String getLocalComplement() {
+    return localComplement;
+  }
+
+  public void setLocalComplement(String localComplement) {
+    this.localComplement = localComplement;
+  }
+
+  public String getLocalCity() {
+    return localCity;
+  }
+
+  public void setLocalCity(String localCity) {
+    this.localCity = localCity;
+  }
+
+  public String getLocalState() {
+    return localState;
+  }
+
+  public void setLocalState(String localState) {
+    this.localState = localState;
+  }
+
+  public String getLocalNeighborhood() {
+    return localNeighborhood;
+  }
+
+  public void setLocalNeighborhood(String localNeighborhood) {
+    this.localNeighborhood = localNeighborhood;
   }
 
 }

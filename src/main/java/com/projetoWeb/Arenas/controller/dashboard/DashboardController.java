@@ -1,7 +1,10 @@
 package com.projetoWeb.Arenas.controller.dashboard;
 
 import java.util.List;
+import java.util.Optional;
 
+import com.projetoWeb.Arenas.controller.userMatch.dto.SearchUserMatchDto;
+import com.projetoWeb.Arenas.model.UserMatch;
 import com.projetoWeb.Arenas.service.userMatch.UserMatchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.projetoWeb.Arenas.controller.dashboard.dto.ResponseDashboardDto;
+import com.projetoWeb.Arenas.model.LocalMatch;
 import com.projetoWeb.Arenas.model.Match;
 import com.projetoWeb.Arenas.model.enums.MatchStatus;
 import com.projetoWeb.Arenas.model.enums.UserMatchStatus;
+import com.projetoWeb.Arenas.service.match.LocalMatchService;
 import com.projetoWeb.Arenas.service.match.MatchService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +29,7 @@ public class DashboardController {
 
   private final MatchService matchService;
   private final UserMatchService userMatchService;
+  private final LocalMatchService localMatchService;
 
   @GetMapping("next-matches/{userId}")
   public ResponseEntity<List<ResponseDashboardDto>> getNextMacths(@PathVariable Long userId) {
@@ -41,6 +47,34 @@ public class DashboardController {
 
       String createdUserName = match.getCreaterUserId().getFirstName() + " " + match.getCreaterUserId().getLastName();
 
+      String localName = null;
+      String localZipCode = null;
+      String localStreet = null;
+      String localNumber = null;
+      String localComplement = null;
+      String localCity = null;
+      String localState = null;
+      String localNeighborhood = null;
+
+      try {
+        LocalMatch localMatch = localMatchService.findByMatchId(match.getId());
+        if (localMatch != null) {
+          localName = localMatch.getDescription();
+          localZipCode = localMatch.getZipCode();
+          localStreet = localMatch.getStreet();
+          localNumber = localMatch.getNumber();
+          localComplement = localMatch.getComplement();
+          localCity = localMatch.getCity();
+          localState = localMatch.getState();
+          localNeighborhood = localMatch.getNeighborhood();
+        }
+      } catch (Exception e) {
+      }
+
+      SearchUserMatchDto searchUserMatchDto = new SearchUserMatchDto(userId, match.getId());
+      List<UserMatch> userMatch = userMatchService.findByUserAndMatch(searchUserMatchDto);
+
+
       return ResponseDashboardDto.builder()
           .id(match.getId())
           .createUserId(match.getCreaterUserId().getId())
@@ -50,7 +84,15 @@ public class DashboardController {
           .date(match.getMatchDate().toLocalDate().toString())
           .maxPlayers(match.getMaxPlayers())
           .currentPlayers(currentPlayers)
-          .status(match.getMatchStatus().getValue())
+          .status(!userMatch.isEmpty() && userMatch.get(0) != null ? userMatch.get(0).getUserMatchStatus().getValue() : "A")
+          .localName(localName)
+          .localZipCode(localZipCode)
+          .localStreet(localStreet)
+          .localNumber(localNumber)
+          .localComplement(localComplement)
+          .localCity(localCity)
+          .localState(localState)
+          .localNeighborhood(localNeighborhood)
           .build();
 
     }).toList();
