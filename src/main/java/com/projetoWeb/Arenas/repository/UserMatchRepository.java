@@ -15,6 +15,7 @@ public interface UserMatchRepository extends JpaRepository<UserMatch, Long> {
   List<UserMatch> findByMatch(Match match);
 
   List<UserMatch> findByMatchId(Long matchId);
+  List<UserMatch> findByMatchIdAndUserId(Long matchId, Long userId);
 
   List<UserMatch> findByMatchIdAndUserMatchStatus(Long matchId, UserMatchStatus status);
 

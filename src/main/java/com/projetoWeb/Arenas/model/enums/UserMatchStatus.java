@@ -21,4 +21,13 @@ public enum UserMatchStatus {
     public String getValue() {
         return value;
     }
+
+    public static UserMatchStatus fromString(String text) {
+        for (UserMatchStatus userMatch: UserMatchStatus.values()) {
+            if (userMatch.value.equalsIgnoreCase(text)) {
+                return userMatch;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with value: " + text);
+    }
 }

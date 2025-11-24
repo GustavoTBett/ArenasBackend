@@ -33,4 +33,12 @@ public enum RolePlayer {
         return value;
     }
 
+    public static RolePlayer fromString(String text) {
+        for (RolePlayer player: RolePlayer.values()) {
+            if (player.value.equalsIgnoreCase(text)) {
+                return player;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with value: " + text);
+    }
 }
