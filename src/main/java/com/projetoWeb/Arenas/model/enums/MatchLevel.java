@@ -1,10 +1,9 @@
 package com.projetoWeb.Arenas.model.enums;
 
 public enum MatchLevel {
-    INICIANTE("Iniciante"),
-    INTERMEDIARIO("Intermediario"),
-    AVANCADO("Avancado"),
-    MISTO("Misto");
+    INICIANTE("I"),
+    INTERMEDIARIO("M"),
+    AVANCADO("A");
 
     private String value;
 
