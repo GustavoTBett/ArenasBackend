@@ -177,7 +177,7 @@ public class MatchService {
 
     private boolean hasValidAddress(LocalMatch local) {
         return local.getStreet() != null && !local.getStreet().isEmpty() &&
-               local.getCity() != null && !local.getCity().isEmpty();
+                local.getCity() != null && !local.getCity().isEmpty();
     }
 
     private String formatAddress(LocalMatch local) {
@@ -206,7 +206,7 @@ public class MatchService {
         if (local.getZipCode() != null && !local.getZipCode().isEmpty()) {
             address.append(" (").append(local.getZipCode()).append(")");
         }
-        
+
         return address.toString();
     }
 

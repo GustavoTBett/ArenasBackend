@@ -1,5 +1,9 @@
 package com.projetoWeb.Arenas.controller.match.dto;
 
+import java.util.List;
+
+import com.projetoWeb.Arenas.model.UserMatch;
+
 import lombok.Builder;
 
 @Builder
@@ -22,6 +26,8 @@ public class ResponseSearchMatchDto {
   private String localCity;
   private String localState;
   private String localNeighborhood;
+  private Boolean privateMatch;
+  private List<UserMatch> players;
 
   public Long getId() {
     return id;
@@ -157,6 +163,22 @@ public class ResponseSearchMatchDto {
 
   public void setLocalNeighborhood(String localNeighborhood) {
     this.localNeighborhood = localNeighborhood;
+  }
+
+  public Boolean getPrivateMatch() {
+    return privateMatch;
+  }
+
+  public void setPrivateMatch(Boolean privateMatch) {
+    this.privateMatch = privateMatch;
+  }
+
+  public List<UserMatch> getPlayers() {
+    return players;
+  }
+
+  public void setPlayers(List<UserMatch> players) {
+    this.players = players;
   }
 
 }

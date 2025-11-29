@@ -2,7 +2,6 @@ package com.projetoWeb.Arenas.controller.match;
 
 import java.util.List;
 
-import com.projetoWeb.Arenas.service.userMatch.UserMatchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +23,14 @@ import com.projetoWeb.Arenas.controller.match.dto.SolicitacaoMatchDto;
 import com.projetoWeb.Arenas.controller.match.dto.UserMatchDto;
 import com.projetoWeb.Arenas.model.LocalMatch;
 import com.projetoWeb.Arenas.model.Match;
+import com.projetoWeb.Arenas.model.MatchParameter;
 import com.projetoWeb.Arenas.model.User;
 import com.projetoWeb.Arenas.model.UserMatch;
 import com.projetoWeb.Arenas.model.enums.UserMatchStatus;
 import com.projetoWeb.Arenas.service.match.LocalMatchService;
+import com.projetoWeb.Arenas.service.match.MatchParameterService;
 import com.projetoWeb.Arenas.service.match.MatchService;
+import com.projetoWeb.Arenas.service.userMatch.UserMatchService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,7 @@ public class MatchController {
     private final MatchService matchService;
     private final UserMatchService userMatchService;
     private final LocalMatchService localMatchService;
+    private final MatchParameterService matchParameterService;
 
     @GetMapping("/calendario/{userId}")
     public ResponseEntity<List<CalendarioMatchDto>> getCalendarioMatches(@PathVariable Long userId) {
@@ -104,6 +107,8 @@ public class MatchController {
             String localState = null;
             String localNeighborhood = null;
 
+            Boolean privateMatch = false;
+
             try {
                 LocalMatch localMatch = localMatchService.findByMatchId(match.getId());
                 if (localMatch != null) {
@@ -115,6 +120,11 @@ public class MatchController {
                     localCity = localMatch.getCity();
                     localState = localMatch.getState();
                     localNeighborhood = localMatch.getNeighborhood();
+                }
+
+                MatchParameter matchParameter = matchParameterService.findByMatchId(match.getId());
+                if (matchParameter != null) {
+                    privateMatch = matchParameter.getPrivateMatch();
                 }
             } catch (Exception e) {
             }
@@ -137,6 +147,8 @@ public class MatchController {
                     .localCity(localCity)
                     .localState(localState)
                     .localNeighborhood(localNeighborhood)
+                    .privateMatch(privateMatch)
+                    .players(userMatchService.findByMatchId(match.getId()))
                     .build();
 
         }).toList();
@@ -153,21 +165,21 @@ public class MatchController {
     @GetMapping("/solicitacoes/{creatorUserId}")
     public ResponseEntity<List<SolicitacaoMatchDto>> getSolicitacoes(
             @PathVariable Long creatorUserId) {
-        
+
         List<UserMatch> solicitacoes = userMatchService.findSolicitacoesByCreator(creatorUserId);
-        
+
         if (solicitacoes.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        
+
         List<SolicitacaoMatchDto> dtos = solicitacoes.stream().map(userMatch -> {
             User user = userMatch.getUser();
-            
+
             String profilePicBase64 = null;
             if (user.getProfilePic() != null && user.getProfilePic().length > 0) {
                 profilePicBase64 = java.util.Base64.getEncoder().encodeToString(user.getProfilePic());
             }
-            
+
             return SolicitacaoMatchDto.builder()
                     .userMatchId(userMatch.getId())
                     .matchId(userMatch.getMatch().getId())
@@ -181,24 +193,23 @@ public class MatchController {
                     .rolePlayer(userMatch.getRolePlayer())
                     .build();
         }).toList();
-        
+
         return ResponseEntity.ok(dtos);
     }
 
     @PatchMapping("/solicitacoes/responder")
     public ResponseEntity<String> responderSolicitacao(
             @Valid @RequestBody ResponderSolicitacaoRequest request) {
-        
+
         userMatchService.responderSolicitacao(
-            request.getUserMatchId(), 
-            request.getAceitar(), 
-            request.getCreatorUserId()
-        );
-        
-        String mensagem = request.getAceitar() 
-            ? "Solicitação aceita com sucesso" 
-            : "Solicitação recusada";
-            
+                request.getUserMatchId(),
+                request.getAceitar(),
+                request.getCreatorUserId());
+
+        String mensagem = request.getAceitar()
+                ? "Solicitação aceita com sucesso"
+                : "Solicitação recusada";
+
         return ResponseEntity.ok(mensagem);
     }
 
