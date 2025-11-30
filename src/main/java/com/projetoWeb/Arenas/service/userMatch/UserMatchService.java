@@ -150,4 +150,45 @@ public class UserMatchService {
 
         return  userMatchRepository.save(newUserMatch);
     }
+
+    /**
+     * Remove um jogador específico de uma partida
+     * Apenas o criador da partida pode remover jogadores
+     * Não permite remover jogadores de partidas finalizadas
+     * 
+     * @param matchId ID da partida
+     * @param playerId ID do jogador a ser removido
+     * @param requestingUserId ID do usuário que está fazendo a requisição
+     * @throws EntityNotExistsException se a partida ou jogador não existir
+     * @throws IllegalStateException se a partida já foi finalizada
+     * @throws SecurityException se o usuário não for o criador da partida
+     */
+    public void removePlayerFromMatch(Long matchId, Long playerId, Long requestingUserId) {
+        Match match = matchService.findById(matchId);
+        
+        // Valida se o usuário é o criador da partida
+        if (!match.getCreaterUserId().getId().equals(requestingUserId)) {
+            throw new SecurityException("Apenas o criador da partida pode remover jogadores");
+        }
+        
+        // Valida se a partida não está finalizada
+        if (match.getMatchStatus() == com.projetoWeb.Arenas.model.enums.MatchStatus.FINALIZADA) {
+            throw new IllegalStateException("Não é possível remover jogadores de uma partida finalizada");
+        }
+        
+        // Valida se não está tentando remover o criador
+        if (match.getCreaterUserId().getId().equals(playerId)) {
+            throw new IllegalArgumentException("O criador da partida não pode ser removido");
+        }
+        
+        // Busca o UserMatch específico
+        UserMatch userMatch = userMatchRepository.findByMatch_IdAndUser_Id(matchId, playerId);
+        
+        if (userMatch == null) {
+            throw new EntityNotExistsException("Jogador não encontrado nesta partida");
+        }
+        
+        // Remove o jogador
+        userMatchRepository.delete(userMatch);
+    }
 }

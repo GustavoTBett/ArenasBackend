@@ -22,4 +22,14 @@ public interface UserMatchRepository extends JpaRepository<UserMatch, Long> {
   void deleteByMatchId(Long matchId);
 
   long countByMatch(Match match);
+
+  /**
+   * Busca um UserMatch específico por matchId e userId
+   */
+  UserMatch findByMatch_IdAndUser_Id(Long matchId, Long userId);
+
+  /**
+   * Deleta um UserMatch específico por matchId e userId
+   */
+  void deleteByMatch_IdAndUser_Id(Long matchId, Long userId);
 }

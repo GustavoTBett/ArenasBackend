@@ -213,4 +213,306 @@ public class MatchController {
         return ResponseEntity.ok(mensagem);
     }
 
+    /**
+     * Busca todas as partidas criadas por um usuário específico
+     * 
+     * @param userId ID do usuário criador
+     * @return Lista de partidas criadas pelo usuário
+     */
+    @GetMapping("/created/{userId}")
+    public ResponseEntity<List<com.projetoWeb.Arenas.controller.match.dto.MatchCreatedByUserDto>> getMatchesCreatedByUser(
+            @PathVariable Long userId) {
+        
+        List<Match> matches = matchService.findCreatedByUser(userId);
+        
+        if (matches.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        
+        List<com.projetoWeb.Arenas.controller.match.dto.MatchCreatedByUserDto> dtos = matches.stream().map(match -> {
+            String creatorName = match.getCreaterUserId().getFirstName() + " " 
+                               + match.getCreaterUserId().getLastName();
+            
+            Long currentPlayers = userMatchService.countByMatchIdAndUserMatchStatus(
+                match.getId(), 
+                UserMatchStatus.CONFIRMADO
+            );
+            
+            // Campos de localização para construção do mapa
+            String localName = null;
+            String localZipCode = null;
+            String localStreet = null;
+            String localNumber = null;
+            String localComplement = null;
+            String localCity = null;
+            String localState = null;
+            String localNeighborhood = null;
+            
+            try {
+                LocalMatch localMatch = localMatchService.findByMatchId(match.getId());
+                if (localMatch != null) {
+                    localName = localMatch.getDescription();
+                    localZipCode = localMatch.getZipCode();
+                    localStreet = localMatch.getStreet();
+                    localNumber = localMatch.getNumber();
+                    localComplement = localMatch.getComplement();
+                    localCity = localMatch.getCity();
+                    localState = localMatch.getState();
+                    localNeighborhood = localMatch.getNeighborhood();
+                }
+            } catch (Exception e) {
+                // Local não encontrado
+            }
+            
+            return com.projetoWeb.Arenas.controller.match.dto.MatchCreatedByUserDto.builder()
+                    .id(match.getId())
+                    .title(match.getTitle())
+                    .date(match.getMatchDate().toLocalDate().toString())
+                    .time(match.getMatchDate().toLocalTime().toString())
+                    .status(match.getMatchStatus().getValue())
+                    .maxPlayers(match.getMaxPlayers())
+                    .currentPlayers(currentPlayers)
+                    .createUserName(creatorName)
+                    .description(match.getDescription())
+                    .localName(localName)
+                    .localZipCode(localZipCode)
+                    .localStreet(localStreet)
+                    .localNumber(localNumber)
+                    .localComplement(localComplement)
+                    .localCity(localCity)
+                    .localState(localState)
+                    .localNeighborhood(localNeighborhood)
+                    .build();
+        }).toList();
+        
+        return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * Busca detalhes de uma partida incluindo lista de jogadores e suas posições
+     * 
+     * @param matchId ID da partida
+     * @return Detalhes da partida com jogadores e posições
+     */
+    @GetMapping("/{matchId}/players")
+    public ResponseEntity<com.projetoWeb.Arenas.controller.match.dto.MatchPlayersDetailDto> getMatchWithPlayers(
+            @PathVariable Long matchId) {
+        
+        Match match = matchService.getMatchWithPlayers(matchId);
+        
+        // Busca todos os jogadores confirmados na partida
+        List<UserMatch> userMatches = userMatchService.findByMatchId(matchId);
+        List<UserMatch> confirmedPlayers = userMatches.stream()
+                .filter(um -> um.getUserMatchStatus() == UserMatchStatus.CONFIRMADO)
+                .toList();
+        
+        // Converte para PlayerInfoDto
+        List<com.projetoWeb.Arenas.controller.match.dto.PlayerInfoDto> players = confirmedPlayers.stream()
+                .map(um -> {
+                    User user = um.getUser();
+                    return com.projetoWeb.Arenas.controller.match.dto.PlayerInfoDto.builder()
+                            .id(user.getId())
+                            .nome(user.getFirstName() + " " + user.getLastName())
+                            .email(user.getEmail())
+                            .telefone(user.getPhone())
+                            .build();
+                })
+                .toList();
+        
+        // Monta o mapa de posições
+        java.util.Map<String, com.projetoWeb.Arenas.controller.match.dto.PlayerInfoDto> positions = new java.util.HashMap<>();
+        
+        // Inicializa todas as posições como null
+        positions.put("GOL", null);
+        positions.put("LD", null);
+        positions.put("ZAG1", null);
+        positions.put("ZAG2", null);
+        positions.put("LE", null);
+        positions.put("VOL", null);
+        positions.put("MC1", null);
+        positions.put("MC2", null);
+        positions.put("ATA1", null);
+        positions.put("ATA2", null);
+        positions.put("ATA3", null);
+        
+        // Preenche as posições com os jogadores (baseado no RolePlayer)
+        // Nota: Como temos múltiplas posições para o mesmo role, distribuímos sequencialmente
+        java.util.Map<String, Integer> roleCounters = new java.util.HashMap<>();
+        
+        for (UserMatch um : confirmedPlayers) {
+            User user = um.getUser();
+            com.projetoWeb.Arenas.controller.match.dto.PlayerInfoDto playerInfo = 
+                com.projetoWeb.Arenas.controller.match.dto.PlayerInfoDto.builder()
+                    .id(user.getId())
+                    .nome(user.getFirstName() + " " + user.getLastName())
+                    .email(user.getEmail())
+                    .build();
+            
+            String positionKey = mapRolePlayerToPosition(um.getRolePlayer(), roleCounters);
+            if (positionKey != null) {
+                positions.put(positionKey, playerInfo);
+            }
+        }
+        
+        Long currentPlayers = (long) confirmedPlayers.size();
+        
+        com.projetoWeb.Arenas.controller.match.dto.MatchPlayersDetailDto dto = 
+            com.projetoWeb.Arenas.controller.match.dto.MatchPlayersDetailDto.builder()
+                .id(match.getId())
+                .title(match.getTitle())
+                .date(match.getMatchDate().toLocalDate().toString())
+                .time(match.getMatchDate().toLocalTime().toString())
+                .status(match.getMatchStatus().getValue())
+                .maxPlayers(match.getMaxPlayers())
+                .currentPlayers(currentPlayers)
+                .players(players)
+                .positions(positions)
+                .build();
+        
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
+     * Mapeia RolePlayer para posição no campo
+     * Distribui múltiplas ocorrências do mesmo role em posições diferentes
+     */
+    private String mapRolePlayerToPosition(com.projetoWeb.Arenas.model.enums.RolePlayer rolePlayer, 
+                                          java.util.Map<String, Integer> counters) {
+        if (rolePlayer == null) return null;
+        
+        return switch (rolePlayer) {
+            case GOLEIRO -> "GOL";
+            case LATERAL_DIREITO -> "LD";
+            case LATERAL_ESQUERDO -> "LE";
+            case ZAGUEIRO -> {
+                int count = counters.getOrDefault("ZAG", 0);
+                counters.put("ZAG", count + 1);
+                yield count == 0 ? "ZAG1" : "ZAG2";
+            }
+            case VOLANTE -> "VOL";
+            case MEIA -> {
+                int count = counters.getOrDefault("MC", 0);
+                counters.put("MC", count + 1);
+                yield count == 0 ? "MC1" : "MC2";
+            }
+            case ATACANTE -> {
+                int count = counters.getOrDefault("ATA", 0);
+                counters.put("ATA", count + 1);
+                yield switch (count) {
+                    case 0 -> "ATA1";
+                    case 1 -> "ATA2";
+                    default -> "ATA3";
+                };
+            }
+            default -> null;
+        };
+    }
+
+    /**
+     * Atualiza as posições dos jogadores em uma partida
+     * Apenas o criador da partida pode fazer essa operação
+     * 
+     * @param matchId ID da partida
+     * @param request Requisição com mapa de posições
+     * @return Resposta de sucesso
+     */
+    @PutMapping("/{matchId}/positions")
+    public ResponseEntity<com.projetoWeb.Arenas.controller.match.dto.ApiResponse> updatePositions(
+            @PathVariable Long matchId,
+            @Valid @RequestBody com.projetoWeb.Arenas.controller.match.dto.UpdatePositionsRequest request) {
+        
+        // TODO: Extrair userId do token JWT (por enquanto, precisará ser passado no request)
+        // Por ora, vamos pegar do criador da partida para validação
+        Match match = matchService.findById(matchId);
+        Long creatorId = match.getCreaterUserId().getId();
+        
+        matchService.updatePlayerPositions(matchId, creatorId, request.getPositions());
+        
+        return ResponseEntity.ok(
+            com.projetoWeb.Arenas.controller.match.dto.ApiResponse.builder()
+                .success(true)
+                .message("Posições atualizadas com sucesso")
+                .build()
+        );
+    }
+
+    /**
+     * Remove um jogador específico de uma partida
+     * Apenas o criador da partida pode fazer essa operação
+     * 
+     * @param matchId ID da partida
+     * @param playerId ID do jogador a ser removido
+     * @return Resposta de sucesso
+     */
+    @DeleteMapping("/{matchId}/player/{playerId}")
+    public ResponseEntity<com.projetoWeb.Arenas.controller.match.dto.ApiResponse> removePlayerFromMatch(
+            @PathVariable Long matchId,
+            @PathVariable Long playerId) {
+        
+        // TODO: Extrair userId do token JWT
+        Match match = matchService.findById(matchId);
+        Long requestingUserId = match.getCreaterUserId().getId();
+        
+        userMatchService.removePlayerFromMatch(matchId, playerId, requestingUserId);
+        
+        return ResponseEntity.ok(
+            com.projetoWeb.Arenas.controller.match.dto.ApiResponse.builder()
+                .success(true)
+                .message("Jogador removido com sucesso")
+                .build()
+        );
+    }
+
+    /**
+     * Cancela uma partida
+     * Apenas o criador da partida pode fazer essa operação
+     * Não permite cancelar partidas já finalizadas
+     * 
+     * @param matchId ID da partida
+     * @param matchDto DTO com ID do criador
+     * @return Resposta de sucesso
+     */
+    @PutMapping("/{matchId}/cancel")
+    public ResponseEntity<com.projetoWeb.Arenas.controller.match.dto.ApiResponse> cancelMatchNew(
+            @PathVariable Long matchId,
+            @Valid @RequestBody UserMatchDto matchDto) {
+        
+        matchService.cancel(matchId, matchDto);
+        
+        // TODO: Implementar notificação para todos os jogadores da partida
+        
+        return ResponseEntity.ok(
+            com.projetoWeb.Arenas.controller.match.dto.ApiResponse.builder()
+                .success(true)
+                .message("Partida cancelada com sucesso")
+                .build()
+        );
+    }
+
+    /**
+     * Finaliza uma partida alterando seu status para FINALIZADA
+     * Apenas o criador da partida pode fazer essa operação
+     * Não permite finalizar partidas já canceladas ou finalizadas
+     * 
+     * @param matchId ID da partida
+     * @param matchDto DTO com ID do criador
+     * @return Resposta de sucesso
+     */
+    @PutMapping("/{matchId}/finalize")
+    public ResponseEntity<com.projetoWeb.Arenas.controller.match.dto.ApiResponse> finalizeMatch(
+            @PathVariable Long matchId,
+            @Valid @RequestBody UserMatchDto matchDto) {
+        
+        matchService.finalize(matchId, matchDto);
+        
+        // TODO: Implementar notificação para todos os jogadores da partida
+        
+        return ResponseEntity.ok(
+            com.projetoWeb.Arenas.controller.match.dto.ApiResponse.builder()
+                .success(true)
+                .message("Partida finalizada com sucesso")
+                .build()
+        );
+    }
+
 }

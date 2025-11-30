@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.projetoWeb.Arenas.model.UserMatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -120,6 +121,49 @@ public class MatchService {
         return matchRepository.save(newMatch);
     }
 
+    /**
+     * Finaliza uma partida alterando seu status para FINALIZADA.
+     * Apenas o criador da partida pode finalizar.
+     * Não permite finalizar partidas já canceladas ou finalizadas.
+     * 
+     * @param id ID da partida
+     * @param matchDto DTO com ID do usuário criador
+     * @return Match atualizada com status FINALIZADA
+     * @throws EntityNotExistsException se a partida não existir ou usuário não for o criador
+     * @throws IllegalStateException se a partida já estiver cancelada ou finalizada
+     */
+    public Match finalize(Long id, UserMatchDto matchDto) {
+        User user = userService.getUserById(matchDto.creatorUserId());
+        Match match = findById(id);
+
+        // Valida se o usuário é o criador da partida
+        if (!user.getId().equals(match.getCreaterUserId().getId())) {
+            throw new EntityNotExistsException("Apenas o criador da partida pode finalizá-la");
+        }
+
+        // Valida se a partida já está cancelada
+        if (match.getMatchStatus() == MatchStatus.CANCELADA) {
+            throw new IllegalStateException("Não é possível finalizar uma partida cancelada");
+        }
+
+        // Valida se a partida já está finalizada
+        if (match.getMatchStatus() == MatchStatus.FINALIZADA) {
+            throw new IllegalStateException("Esta partida já está finalizada");
+        }
+
+        Match newMatch = Match.builder()
+                .id(match.getId())
+                .matchDate(match.getMatchDate())
+                .title(match.getTitle())
+                .maxPlayers(match.getMaxPlayers())
+                .description(match.getDescription())
+                .createrUserId(match.getCreaterUserId())
+                .matchStatus(MatchStatus.FINALIZADA)
+                .build();
+
+        return matchRepository.save(newMatch);
+    }
+
     public void delete(Long id, UserMatchDto matchDto) {
         User user = userService.getUserById(matchDto.creatorUserId());
         Match match = findById(id);
@@ -138,21 +182,22 @@ public class MatchService {
         List<Match> matches = matchRepository.findAllByUserId(userId);
 
         return matches.stream()
-                .map(this::convertToCalendarioDto)
+                .map(match -> convertToCalendarioDto(match, userId))
                 .collect(Collectors.toList());
     }
 
-    private CalendarioMatchDto convertToCalendarioDto(Match match) {
+    private CalendarioMatchDto convertToCalendarioDto(Match match, Long userId) {
         String localInfo = getLocalInfo(match);
 
         long participantesAtuais = userMatchRepository.countByMatch(match);
+        UserMatch userMatch = userMatchRepository.findByMatch_IdAndUser_Id(match.getId(), userId);
         String participantesInfo = participantesAtuais + "/" + match.getMaxPlayers();
 
         return CalendarioMatchDto.builder()
                 .id(match.getId())
                 .titulo(match.getTitle())
                 .dataHora(match.getMatchDate())
-                .status(match.getMatchStatus().getValue())
+                .status(userMatch.getUserMatchStatus().getValue())
                 .local(localInfo)
                 .participantes(participantesInfo)
                 .build();
@@ -214,6 +259,17 @@ public class MatchService {
         return matchRepository.findByMatchStatus(status);
     }
 
+    /**
+     * Busca partidas onde o usuário está vinculado como jogador através de UserMatch.
+     * 
+     * IMPORTANTE: Retorna APENAS partidas onde existe um registro em UserMatch
+     * com userMatchStatus = CONFIRMADO para o userId especificado.
+     * NÃO retorna partidas apenas porque o usuário é o criador.
+     * 
+     * @param userId ID do usuário que deve estar vinculado como jogador
+     * @param status Status da partida a ser filtrado
+     * @return Lista de partidas onde o usuário participa como jogador confirmado
+     */
     public List<Match> findByUserAndMatchStatus(Long userId, MatchStatus status) {
         return matchRepository.findByUserAndMatchStatus(userId, status);
     }
@@ -229,5 +285,111 @@ public class MatchService {
                 searchMatchDto.date(),
                 searchMatchDto.time(),
                 searchMatchDto.userValue());
+    }
+
+    /**
+     * Busca todas as partidas criadas por um usuário específico
+     * 
+     * @param userId ID do usuário criador
+     * @return Lista de partidas criadas pelo usuário
+     */
+    @Transactional(readOnly = true)
+    public List<Match> findCreatedByUser(Long userId) {
+        return matchRepository.findByCreaterUserId_IdAndMatchStatus(userId, MatchStatus.CONFIRMADA);
+    }
+
+    /**
+     * Busca detalhes de uma partida incluindo jogadores e suas posições
+     * 
+     * @param matchId ID da partida
+     * @return Match com detalhes completos
+     */
+    @Transactional(readOnly = true)
+    public Match getMatchWithPlayers(Long matchId) {
+        Match match = findById(matchId);
+        // Os jogadores serão buscados via UserMatchRepository no controller
+        return match;
+    }
+
+    /**
+     * Atualiza as posições dos jogadores em uma partida
+     * Valida se o mesmo jogador não está em múltiplas posições
+     * 
+     * @param matchId ID da partida
+     * @param userId ID do usuário que está fazendo a alteração (deve ser o criador)
+     * @param positions Mapa de posição -> userId
+     * @throws EntityNotExistsException se a partida não existir ou usuário não for o criador
+     * @throws IllegalArgumentException se houver jogador duplicado em posições
+     */
+    @Transactional
+    public void updatePlayerPositions(Long matchId, Long userId, java.util.Map<String, Long> positions) {
+        Match match = findById(matchId);
+        
+        // Valida se o usuário é o criador da partida
+        if (!match.getCreaterUserId().getId().equals(userId)) {
+            throw new EntityNotExistsException("Apenas o criador da partida pode gerenciar as posições");
+        }
+        
+        // Valida se a partida não está finalizada
+        if (match.getMatchStatus() == MatchStatus.FINALIZADA) {
+            throw new IllegalStateException("Não é possível alterar posições de uma partida finalizada");
+        }
+        
+        // Valida se não há jogadores duplicados em diferentes posições
+        java.util.Set<Long> playerIds = new java.util.HashSet<>();
+        for (java.util.Map.Entry<String, Long> entry : positions.entrySet()) {
+            Long playerId = entry.getValue();
+            if (playerId != null) {
+                if (playerIds.contains(playerId)) {
+                    throw new IllegalArgumentException("O mesmo jogador não pode ocupar múltiplas posições");
+                }
+                playerIds.add(playerId);
+            }
+        }
+        
+        // Busca todos os UserMatch da partida
+        List<com.projetoWeb.Arenas.model.UserMatch> userMatches = userMatchRepository.findByMatchId(matchId);
+        
+        // Atualiza as posições
+        for (com.projetoWeb.Arenas.model.UserMatch userMatch : userMatches) {
+            Long userMatchUserId = userMatch.getUser().getId();
+            
+            // Procura qual posição foi atribuída a este jogador
+            String assignedPosition = null;
+            for (java.util.Map.Entry<String, Long> entry : positions.entrySet()) {
+                if (entry.getValue() != null && entry.getValue().equals(userMatchUserId)) {
+                    assignedPosition = entry.getKey();
+                    break;
+                }
+            }
+            
+            // Atualiza a posição do jogador
+            if (assignedPosition != null) {
+                try {
+                    com.projetoWeb.Arenas.model.enums.RolePlayer rolePlayer = 
+                        mapPositionToRolePlayer(assignedPosition);
+                    userMatch.setRolePlayer(rolePlayer);
+                    userMatchRepository.save(userMatch);
+                } catch (IllegalArgumentException e) {
+                    // Posição inválida, ignora
+                }
+            }
+        }
+    }
+
+    /**
+     * Mapeia a posição do frontend para o enum RolePlayer
+     */
+    private com.projetoWeb.Arenas.model.enums.RolePlayer mapPositionToRolePlayer(String position) {
+        return switch (position) {
+            case "GOL" -> com.projetoWeb.Arenas.model.enums.RolePlayer.GOLEIRO;
+            case "LD" -> com.projetoWeb.Arenas.model.enums.RolePlayer.LATERAL_DIREITO;
+            case "LE" -> com.projetoWeb.Arenas.model.enums.RolePlayer.LATERAL_ESQUERDO;
+            case "ZAG1", "ZAG2" -> com.projetoWeb.Arenas.model.enums.RolePlayer.ZAGUEIRO;
+            case "VOL" -> com.projetoWeb.Arenas.model.enums.RolePlayer.VOLANTE;
+            case "MC1", "MC2" -> com.projetoWeb.Arenas.model.enums.RolePlayer.MEIA;
+            case "ATA1", "ATA2", "ATA3" -> com.projetoWeb.Arenas.model.enums.RolePlayer.ATACANTE;
+            default -> throw new IllegalArgumentException("Posição inválida: " + position);
+        };
     }
 }

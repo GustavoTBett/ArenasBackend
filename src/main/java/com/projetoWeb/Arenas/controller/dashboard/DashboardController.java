@@ -30,6 +30,16 @@ public class DashboardController {
   private final UserMatchService userMatchService;
   private final LocalMatchService localMatchService;
 
+  /**
+   * Busca as próximas partidas do usuário para o Dashboard.
+   * 
+   * IMPORTANTE: Retorna APENAS partidas onde o usuário está vinculado como jogador
+   * através da tabela UserMatch com status CONFIRMADO.
+   * Não retorna partidas apenas porque o usuário é o criador.
+   * 
+   * @param userId ID do usuário
+   * @return Lista de partidas confirmadas onde o usuário participa como jogador
+   */
   @GetMapping("next-matches/{userId}")
   public ResponseEntity<List<ResponseDashboardDto>> getNextMacths(@PathVariable Long userId) {
 
