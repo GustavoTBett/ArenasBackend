@@ -1,7 +1,6 @@
 package com.projetoWeb.Arenas.repository;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -66,8 +65,9 @@ public class MatchRepositoryImpl implements MatchRespositoryCustom {
     if (date != null && !date.isEmpty()) {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
       LocalDate parsedDate = LocalDate.parse(date, formatter);
-      builder.and(match.matchDate.between(parsedDate.atStartOfDay(ZoneId.systemDefault()),
-          parsedDate.plusDays(1).atStartOfDay(ZoneId.systemDefault())));
+      builder.and(match.matchDate.between(
+          parsedDate.atStartOfDay(),
+          parsedDate.plusDays(1).atStartOfDay()));
     }
     if (time != null && !time.isEmpty()) {
       int hour = Integer.parseInt(time.split(":")[0]);
