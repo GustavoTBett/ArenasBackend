@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -23,7 +23,7 @@ public class Match {
     private Long id;
 
     @Column(nullable = false)
-    private ZonedDateTime matchDate;
+    private LocalDateTime matchDate;
 
     @Column(nullable = false)
     private String title;
